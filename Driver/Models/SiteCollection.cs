@@ -11,11 +11,9 @@ public class SiteCollection : ISiteCollection<ISite>
 
     private readonly List<ISite> _sites;
 
-    public ISite this[string name]
+    public ISite? this[string name]
     {
-#pragma warning disable CS8603 // 可能返回 null 引用。
         get => _sites.Find(s => s.Name == name);
-#pragma warning restore CS8603 // 可能返回 null 引用。
     }
 
     public ISite this[int index] { get => _sites[index]; }

@@ -12,13 +12,11 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public int Count => _list.Count;
 
-    public IBindingInformation this[string bindingInformationStr]
+    public IBindingInformation? this[string bindingInformationStr]
     {
         get
         {
-#pragma warning disable CS8603 // 可能返回 null 引用。
             return _list.Find(binding => binding.ToString() == bindingInformationStr);
-#pragma warning restore CS8603 // 可能返回 null 引用。
         }
     }
 
