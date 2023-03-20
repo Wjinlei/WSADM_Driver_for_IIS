@@ -1,3 +1,6 @@
+using NUnit.Framework.Interfaces;
+using WSADM.Interfaces;
+
 namespace Driver.Test;
 
 public class Tests
@@ -20,21 +23,11 @@ public class Tests
         iis.Sites["www.test1.com"]?.Bindings.Add("bbs.test1.com", 8080);
         iis.Sites["www.test1.com"]?.Bindings.Add("m.test1.com", 80);
 
-        iis.Sites.Add("www.test2.com", "d:/wwwroot", "www.test2.com", 80);
-        iis.Sites["www.test2.com"]?.Bindings.Add("bbs.test2.com", 8080);
-        iis.Sites["www.test2.com"]?.Bindings.Add("m.test2.com", 80);
-
-        iis.Sites.Add("www.test3.com", "d:/wwwroot", "www.test3.com", 80);
-        iis.Sites["www.test3.com"]?.Bindings.Add("bbs.test3.com", 8080);
-        iis.Sites["www.test3.com"]?.Bindings.Add("m.test3.com", 80);
-
         // Delete site example
-        var test2 = iis.Sites["www.test2.com"];
+        var test2 = iis.Sites["www.test1.com"];
         Assert.That(test2, Is.Not.Null);
         iis.Sites.Remove(test2);
-
-        iis.Sites.Remove("www.test3.com");
-
+        iis.Sites.Remove("www.test3.com"); // It can also be removed by passing the website name
 
         // Modify site binding information
         var binding = iis.Sites["www.test1.com"]?.Bindings["*:80:m.test1.com"];
