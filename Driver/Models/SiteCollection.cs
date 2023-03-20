@@ -14,7 +14,7 @@ public class SiteCollection : ISiteCollection<ISite>
     public ISite this[string name]
     {
 #pragma warning disable CS8603 // 可能返回 null 引用。
-        get => _sites.FirstOrDefault(s => s.Name == name);
+        get => _sites.Find(s => s.Name == name);
 #pragma warning restore CS8603 // 可能返回 null 引用。
     }
 
@@ -43,10 +43,11 @@ public class SiteCollection : ISiteCollection<ISite>
     public Result Add(ISite site)
     {
         var result = Check(site);
-        if (result.Success)
-            _sites.Add(site);
+        if (!result.Success)
+            return result;
 
-        return result;
+        _sites.Add(site);
+        return Result.Ok;
     }
 
     public Result Add(string name, string physicalPath, int port)
@@ -55,7 +56,6 @@ public class SiteCollection : ISiteCollection<ISite>
         var result = bindings.Add(new BindingInformation("", port));
         if (!result.Success)
             return result;
-
         return Add(new Site(name, physicalPath, bindings));
     }
 
@@ -65,7 +65,6 @@ public class SiteCollection : ISiteCollection<ISite>
         var result = bindings.Add(new BindingInformation(domain, port));
         if (!result.Success)
             return result;
-
         return Add(new Site(name, physicalPath, bindings));
     }
 
@@ -74,9 +73,16 @@ public class SiteCollection : ISiteCollection<ISite>
         return Add(new Site(name, physicalPath, bindings));
     }
 
-    public void Clear()
+    public void Remove(ISite site)
     {
-        _sites.Clear();
+        _sites.Remove(site);
+    }
+
+    public void Remove(string name)
+    {
+        var site = _sites.Find(site => site.Name == name);
+        if (site != null)
+            _sites.Remove(site);
     }
 
     public bool Contains(ISite site)
@@ -84,9 +90,21 @@ public class SiteCollection : ISiteCollection<ISite>
         return _sites.Contains(site);
     }
 
-    public void Remove(ISite site)
+    public bool Contains(string name)
     {
-        _sites.Remove(site);
+        var site = _sites.Find(site => site.Name == name);
+        if (site != null) return true;
+        return false;
+    }
+
+    public ISite? Find(Predicate<ISite> match)
+    {
+        return _sites.Find(match);
+    }
+
+    public void Clear()
+    {
+        _sites.Clear();
     }
 
     public IEnumerator<ISite> GetEnumerator()
@@ -101,10 +119,15 @@ public class SiteCollection : ISiteCollection<ISite>
 
     public Result Check(ISite site)
     {
+        if (_sites.Contains(site))
+            return Result.Error(new Exception("This site already exists"));
+
         if (site.Bindings.Count == 0)
             return Result.Error(new Exception("The binding information cannot be empty"));
+
         if (site.Name == "")
             return Result.Error(new Exception("The site name cannot be empty"));
+
         if (site.PhysicalPath == "")
             return Result.Error(new Exception("The physical path cannot be empty"));
 

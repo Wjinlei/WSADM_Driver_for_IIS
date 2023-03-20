@@ -12,13 +12,23 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public int Count => _list.Count;
 
+    public IBindingInformation this[string bindingInformationStr]
+    {
+        get
+        {
+#pragma warning disable CS8603 // 可能返回 null 引用。
+            return _list.Find(binding => binding.ToString() == bindingInformationStr);
+#pragma warning restore CS8603 // 可能返回 null 引用。
+        }
+    }
+
+    public IBindingInformation this[int index] => _list[index];
+
     public BindingInformationCollection(SiteCollection sites)
     {
         _list = new List<IBindingInformation>();
         _sites = sites;
     }
-
-    public IBindingInformation this[int index] => _list[index];
 
     public Result Add(string domain, int port)
     {
@@ -32,12 +42,12 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public Result Add(IBindingInformation bindingInformation)
     {
-
         var result = Check(bindingInformation);
-        if (result.Success)
-            _list.Add(bindingInformation);
+        if (!result.Success)
+            return result;
 
-        return result;
+        _list.Add(bindingInformation);
+        return Result.Ok;
     }
 
     public void Clear()
@@ -50,9 +60,28 @@ public class BindingInformationCollection : IBindingInformationCollection
         _list.Remove(bindingInformation);
     }
 
+    public void Remove(string bindingInformationStr)
+    {
+        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
+        if (binding != null)
+            _ = _list.Remove(binding);
+    }
+
     public bool Contains(IBindingInformation bindingInformation)
     {
         return _list.Contains(bindingInformation);
+    }
+
+    public bool Contains(string bindingInformationStr)
+    {
+        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
+        if (binding != null) return true;
+        return false;
+    }
+
+    public IBindingInformation? Find(Predicate<IBindingInformation> match)
+    {
+        return _list.Find(match);
     }
 
     public IEnumerator<IBindingInformation> GetEnumerator()
@@ -87,17 +116,20 @@ public class BindingInformationCollection : IBindingInformationCollection
         // Check port
         if (bindingInformation.Port < 1 || bindingInformation.Port > 65535)
             return Result.Error(
-                new ArgumentException(nameof(bindingInformation.Port)));
+                new ArgumentException(nameof(bindingInformation.Port))
+                );
 
         // Check binding information exists in self list
         if (_list.Contains(bindingInformation))
             return Result.Error(
-                new Exception("This binding information already exists"));
+                new Exception("This binding information already exists")
+                );
 
         // Check binding information exists in all site
-        if (_sites.FirstOrDefault(site => site.Bindings.Contains(bindingInformation)) != null)
+        if (_sites.Find(site => site.Bindings.Contains(bindingInformation)) != null)
             return Result.Error(
-                new Exception("This binding information already exists"));
+                new Exception("This binding information already exists")
+                );
 
         return Result.Ok;
     }

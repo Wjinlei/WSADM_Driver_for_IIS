@@ -13,7 +13,7 @@ public class BindingInformation : IBindingInformation
         Port = port;
     }
 
-    public new string ToString()
+    public override string ToString()
     {
         return "*:" + Port + ":" + Domain;
     }
