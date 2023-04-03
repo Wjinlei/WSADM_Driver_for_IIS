@@ -1,4 +1,5 @@
 ﻿using Microsoft.Web.Administration;
+using System.ServiceProcess;
 using WSADM.Interfaces;
 
 namespace Driver.Models;
@@ -7,11 +8,13 @@ public class MyServerManager : IServerManager
 {
     private readonly ServerManager _serverManager;
     private readonly SiteCollection _sites;
+    private ServiceController _serviceController;
 
     public ISiteCollection<ISite> Sites => _sites;
 
     public MyServerManager()
     {
+        _serviceController = new ServiceController("W3SVC");
         _serverManager = new ServerManager();
         _sites = new SiteCollection(_serverManager);
     }
@@ -40,21 +43,22 @@ public class MyServerManager : IServerManager
 
     public void Reload()
     {
-        throw new NotImplementedException();
+        _serviceController.Refresh();
     }
 
     public void Restart()
     {
-        throw new NotImplementedException();
+        _serviceController.Stop();
+        _serviceController.Start();
     }
 
     public void Start()
     {
-        throw new NotImplementedException();
+        _serviceController.Start();
     }
 
     public void Stop()
     {
-        throw new NotImplementedException();
+        _serviceController.Stop();
     }
 }
