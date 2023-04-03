@@ -1,4 +1,6 @@
-﻿using Microsoft.Web.Administration;
+﻿#pragma warning disable CA1416 // 验证平台兼容性，由于这本来就是IIS用的Dll，因此禁用这个检查
+
+using Microsoft.Web.Administration;
 using System.ServiceProcess;
 using WSADM.Interfaces;
 
@@ -62,3 +64,5 @@ public class MyServerManager : IServerManager
         _serviceController.Stop();
     }
 }
+
+#pragma warning restore CA1416 // 验证平台兼容性，由于这本来就是IIS用的Dll，因此禁用这个检查
