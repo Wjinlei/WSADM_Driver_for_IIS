@@ -8,7 +8,7 @@ public class MyServerManager : IServerManager
 {
     private readonly ServerManager _serverManager;
     private readonly SiteCollection _sites;
-    private ServiceController _serviceController;
+    private readonly ServiceController _serviceController;
 
     public ISiteCollection<ISite> Sites => _sites;
 
