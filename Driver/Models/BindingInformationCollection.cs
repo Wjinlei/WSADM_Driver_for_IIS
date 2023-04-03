@@ -49,21 +49,10 @@ public class BindingInformationCollection : IBindingInformationCollection
         return Add(new BindingInformation("", port));
     }
 
-    public void Clear()
+    // Implementation List
+    public IBindingInformation? Find(Predicate<IBindingInformation> match)
     {
-        _list.Clear();
-    }
-
-    public void Remove(IBindingInformation bindingInformation)
-    {
-        _list.Remove(bindingInformation);
-    }
-
-    public void Remove(string bindingInformationStr)
-    {
-        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
-        if (binding != null)
-            _ = _list.Remove(binding);
+        return _list.Find(match);
     }
 
     public bool Contains(IBindingInformation bindingInformation)
@@ -78,9 +67,21 @@ public class BindingInformationCollection : IBindingInformationCollection
         return false;
     }
 
-    public IBindingInformation? Find(Predicate<IBindingInformation> match)
+    public void Remove(IBindingInformation bindingInformation)
     {
-        return _list.Find(match);
+        _list.Remove(bindingInformation);
+    }
+
+    public void Remove(string bindingInformationStr)
+    {
+        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
+        if (binding != null)
+            _ = _list.Remove(binding);
+    }
+
+    public void Clear()
+    {
+        _list.Clear();
     }
 
     // Implementation iterator

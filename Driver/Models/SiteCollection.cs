@@ -77,16 +77,10 @@ public class SiteCollection : ISiteCollection<ISite>
         return Add(new Site(name, physicalPath, bindings));
     }
 
-    public void Remove(ISite site)
+    // Implementation List
+    public ISite? Find(Predicate<ISite> match)
     {
-        _sites.Remove(site);
-    }
-
-    public void Remove(string name)
-    {
-        var site = _sites.Find(site => site.Name == name);
-        if (site != null)
-            _sites.Remove(site);
+        return _sites.Find(match);
     }
 
     public bool Contains(ISite site)
@@ -101,9 +95,16 @@ public class SiteCollection : ISiteCollection<ISite>
         return false;
     }
 
-    public ISite? Find(Predicate<ISite> match)
+    public void Remove(ISite site)
     {
-        return _sites.Find(match);
+        _sites.Remove(site);
+    }
+
+    public void Remove(string name)
+    {
+        var site = _sites.Find(site => site.Name == name);
+        if (site != null)
+            _sites.Remove(site);
     }
 
     public void Clear()
