@@ -6,26 +6,37 @@ namespace Driver.Models;
 
 public class BindingInformationCollection : IBindingInformationCollection
 {
+    // Private
     private readonly List<IBindingInformation> _list;
-
     private readonly SiteCollection _sites;
 
+    // Public
     public int Count => _list.Count;
 
-    public IBindingInformation? this[string bindingInformationStr]
-    {
-        get
-        {
-            return _list.Find(binding => binding.ToString() == bindingInformationStr);
-        }
-    }
-
+    // Indexer
     public IBindingInformation this[int index] => _list[index];
+    public IBindingInformation? this[string bindingInformationStr] => _list.Find(binding => binding.ToString() == bindingInformationStr);
 
+    // Constructor
     public BindingInformationCollection(SiteCollection sites)
     {
         _list = new List<IBindingInformation>();
         _sites = sites;
+    }
+
+    // Methods
+    public Result Add(IBindingInformation bindingInformation)
+    {
+        // Check parameter
+        if (bindingInformation.Port < 1 || bindingInformation.Port > 65535)
+            return Result.Error(new ArgumentException(nameof(bindingInformation.Port)));
+        if (_list.Contains(bindingInformation))
+            return Result.Error(new ArgumentException("This binding information already exists"));
+        if (_sites.Any(site => site.Bindings.Contains(bindingInformation)))
+            return Result.Error(new ArgumentException("This binding information already exists"));
+
+        _list.Add(bindingInformation);
+        return Result.Ok;
     }
 
     public Result Add(string domain, int port)
@@ -36,16 +47,6 @@ public class BindingInformationCollection : IBindingInformationCollection
     public Result Add(int port)
     {
         return Add(new BindingInformation("", port));
-    }
-
-    public Result Add(IBindingInformation bindingInformation)
-    {
-        var result = Check(bindingInformation);
-        if (!result.Success)
-            return result;
-
-        _list.Add(bindingInformation);
-        return Result.Ok;
     }
 
     public void Clear()
@@ -82,6 +83,7 @@ public class BindingInformationCollection : IBindingInformationCollection
         return _list.Find(match);
     }
 
+    // Implementation iterator
     public IEnumerator<IBindingInformation> GetEnumerator()
     {
         return _list.GetEnumerator();
@@ -92,6 +94,7 @@ public class BindingInformationCollection : IBindingInformationCollection
         return GetEnumerator();
     }
 
+    // Implementation comparator
     public override bool Equals(object? obj)
     {
         return obj is BindingInformationCollection collection &&
@@ -102,33 +105,5 @@ public class BindingInformationCollection : IBindingInformationCollection
     public override int GetHashCode()
     {
         return HashCode.Combine(_list, Count);
-    }
-
-    /// <summary>
-    /// Check binding information
-    /// </summary>
-    /// <param name="bindingInformation">IBindingInformation instance.</param>
-    /// <returns></returns>
-    private Result Check(IBindingInformation bindingInformation)
-    {
-        // Check port
-        if (bindingInformation.Port < 1 || bindingInformation.Port > 65535)
-            return Result.Error(
-                new ArgumentException(nameof(bindingInformation.Port))
-                );
-
-        // Check binding information exists in self list
-        if (_list.Contains(bindingInformation))
-            return Result.Error(
-                new Exception("This binding information already exists")
-                );
-
-        // Check binding information exists in all site
-        if (_sites.Find(site => site.Bindings.Contains(bindingInformation)) != null)
-            return Result.Error(
-                new Exception("This binding information already exists")
-                );
-
-        return Result.Ok;
     }
 }

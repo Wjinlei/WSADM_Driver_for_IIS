@@ -7,19 +7,18 @@ namespace Driver.Models;
 
 public class SiteCollection : ISiteCollection<ISite>
 {
+    // Private
     private readonly ServerManager _serverManager;
-
     private readonly List<ISite> _sites;
 
-    public ISite? this[string name]
-    {
-        get => _sites.Find(s => s.Name == name);
-    }
-
-    public ISite this[int index] { get => _sites[index]; }
-
+    // Public
     public int Count => _sites.Count;
 
+    // Indexer
+    public ISite this[int index] { get => _sites[index]; }
+    public ISite? this[string name] => _sites.Find(s => s.Name == name);
+
+    // Constructor
     public SiteCollection(ServerManager serverManager)
     {
         _serverManager = serverManager;
@@ -38,11 +37,18 @@ public class SiteCollection : ISiteCollection<ISite>
         }
     }
 
+    // Methods
     public Result Add(ISite site)
     {
-        var result = Check(site);
-        if (!result.Success)
-            return result;
+        // Check parameter
+        if (site.Bindings.Count < 1)
+            return Result.Error(new ArgumentException("The binding information cannot be empty"));
+        if (string.IsNullOrWhiteSpace(site.Name))
+            return Result.Error(new ArgumentException("The site name cannot be empty"));
+        if (string.IsNullOrWhiteSpace(site.PhysicalPath))
+            return Result.Error(new ArgumentException("The physical path cannot be empty"));
+        if (_sites.Contains(site))
+            return Result.Error(new ArgumentException("This site already exists"));
 
         _sites.Add(site);
         return Result.Ok;
@@ -105,6 +111,7 @@ public class SiteCollection : ISiteCollection<ISite>
         _sites.Clear();
     }
 
+    // Implementation iterator
     public IEnumerator<ISite> GetEnumerator()
     {
         return _sites.GetEnumerator();
@@ -113,22 +120,5 @@ public class SiteCollection : ISiteCollection<ISite>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    public Result Check(ISite site)
-    {
-        if (_sites.Contains(site))
-            return Result.Error(new Exception("This site already exists"));
-
-        if (site.Bindings.Count == 0)
-            return Result.Error(new Exception("The binding information cannot be empty"));
-
-        if (site.Name == "")
-            return Result.Error(new Exception("The site name cannot be empty"));
-
-        if (site.PhysicalPath == "")
-            return Result.Error(new Exception("The physical path cannot be empty"));
-
-        return Result.Ok;
     }
 }
