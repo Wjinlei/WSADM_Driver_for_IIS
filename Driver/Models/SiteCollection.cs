@@ -77,6 +77,24 @@ public class SiteCollection : ISiteCollection<ISite>
         return Add(new Site(name, physicalPath, bindings));
     }
 
+    public Result Add(string name, string physicalPath, List<string> bindings)
+    {
+        var bindingInformationCollection = new BindingInformationCollection(this);
+        bindings.ForEach(element =>
+        {
+            var sArrayElement = element.Split(':');
+            var nameOrDefault = sArrayElement.ElementAtOrDefault(0) ?? "";
+            var portOrDefault = sArrayElement.ElementAtOrDefault(1) ?? "80";
+
+            // Add bindingInformation
+            bindingInformationCollection.Add(
+                new BindingInformation(
+                    nameOrDefault,
+                    Util.Convert.ToInt32OrDefault(portOrDefault, 80)));
+        });
+        return Add(new Site(name, physicalPath, bindingInformationCollection));
+    }
+
     // Implementation List
     public ISite? Find(Predicate<ISite> match)
     {
