@@ -1,12 +1,13 @@
-using NUnit.Framework.Interfaces;
 using WSADM.Interfaces;
 
 namespace Driver.Test;
 
 public class Tests
 {
-    [Test]
-    public void TestDriver()
+    private IServerManager _serverManager;
+
+    [SetUp]
+    public void Setup()
     {
         // Get Driver
         var driverResult = WSADM.DriverManager.RegisterDriver("Driver.IIS", "Driver.dll");
@@ -16,28 +17,54 @@ public class Tests
         // Get Server
         var serverResult = driver.GetServerManager(null);
         Assert.That(serverResult.Success, Is.True);
-        var iis = serverResult.GetOk();
+        _serverManager = serverResult.GetOk();
+    }
 
-        // Add Site example
-        iis.Sites.Add("www.test1.com", "d:/wwwroot", "www.test1.com", 80);
-        iis.Sites["www.test1.com"]?.Bindings.Add("bbs.test1.com", 8080);
-        iis.Sites["www.test1.com"]?.Bindings.Add("m.test1.com", 80);
 
-        // Delete site example
-        //var test1 = iis.Sites["www.test1.com"];
+    [Test]
+    public void TestSiteAdd()
+    {
+        //_serverManager.Sites.Add("www.test1.com", "d:/wwwroot", 80);
+        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("www.test1.com", 80);
+        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("bbs.test1.com", 8080);
+        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("m.test1.com", 80);
+
+        _serverManager.Sites.Add("www.test1.com", "d:/wwwroot", new List<string>
+        {
+            "www.test1.com",
+            "bbs.test1.com:8080",
+            "m.test1.com:80"
+        });
+    }
+
+    [Test]
+    public void TestSiteDelete()
+    {
+        _serverManager.Sites.Remove("www.test1.com");
+
+        //var test1 = _serverManager.Sites["www.test1.com"];
         //Assert.That(test1, Is.Not.Null);
-        //iis.Sites.Remove(test1);
-        //iis.Sites.Remove("www.test2.com"); // It can also be removed by passing the website name
+        //_serverManager.Sites.Remove(test1);
+    }
 
-        // Modify site binding information
-        var binding = iis.Sites["www.test1.com"]?.Bindings["*:80:m.test1.com"];
-        Assert.That(binding, Is.Not.Null);
-        binding.Port = 8080;
+    [Test]
+    public void TestSiteModify()
+    {
+        // Get site
+        var site = _serverManager.Sites["www.test1.com"];
+        Assert.That(site, Is.Not.Null);
 
-        // Delete binding information
-        iis.Sites["www.test1.com"]?.Bindings.Remove("*:8080:bbs.test1.com");
+        // Modify binding
+        var bind = site.Bindings["*:80:m.test1.com"];
+        Assert.That(bind, Is.Not.Null);
+        bind.Port = 8080; // Modify port
 
-        // Commit
-        iis.CommitChanges();
+        site.Bindings.Remove("*:8080:bbs.test1.com"); // Delete binding information
+    }
+
+    [TearDown]
+    public void Commit()
+    {
+        _serverManager.CommitChanges();
     }
 }
