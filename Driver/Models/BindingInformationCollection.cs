@@ -15,7 +15,7 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     // Indexer
     public IBindingInformation this[int index] => _list[index];
-    public IBindingInformation? this[string bindingInformationStr] => _list.Find(binding => binding.ToString() == bindingInformationStr);
+    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => binding.ToString() == bindingInformation);
 
     // Constructor
     public BindingInformationCollection(SiteCollection sites)
@@ -49,6 +49,18 @@ public class BindingInformationCollection : IBindingInformationCollection
         return Add(new BindingInformation("", port));
     }
 
+    public Result Add(string bindingInformation)
+    {
+        var binding = bindingInformation.Split(":");
+        var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
+        var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
+
+        return Add(
+            new BindingInformation(
+                domainNameOrDefault,
+                Util.Convert.ToInt32OrDefault(portOrDefault, 80)));
+    }
+
     // Implementation List
     public IBindingInformation? Find(Predicate<IBindingInformation> match)
     {
@@ -60,9 +72,9 @@ public class BindingInformationCollection : IBindingInformationCollection
         return _list.Contains(bindingInformation);
     }
 
-    public bool Contains(string bindingInformationStr)
+    public bool Contains(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
+        var binding = _list.Find(binding => binding.ToString() == bindingInformation);
         if (binding != null) return true;
         return false;
     }
@@ -72,9 +84,9 @@ public class BindingInformationCollection : IBindingInformationCollection
         _list.Remove(bindingInformation);
     }
 
-    public void Remove(string bindingInformationStr)
+    public void Remove(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.ToString() == bindingInformationStr);
+        var binding = _list.Find(binding => binding.ToString() == bindingInformation);
         if (binding != null)
             _ = _list.Remove(binding);
     }
