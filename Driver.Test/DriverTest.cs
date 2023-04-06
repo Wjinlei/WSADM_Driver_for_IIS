@@ -59,6 +59,7 @@ public class Tests
         Assert.That(bind, Is.Not.Null);
         bind.Port = 8080; // Modify port
 
+        site.Bindings.Add("new.test1.com:8088"); // Add binding information
         site.Bindings.Remove("*:8080:bbs.test1.com"); // Delete binding information
     }
 
