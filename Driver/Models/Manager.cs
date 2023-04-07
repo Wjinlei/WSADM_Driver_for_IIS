@@ -6,19 +6,19 @@ using WSADM.Interfaces;
 
 namespace Driver.Models;
 
-public class MyServerManager : IServerManager
+public class Manager : IServerManager
 {
-    private readonly ServerManager _serverManager;
-    private readonly SiteCollection _sites;
     private readonly ServiceController _serviceController;
+    private readonly ServerManager _serverManager;
+    private readonly ISiteCollection<ISite> _sites;
 
     public ISiteCollection<ISite> Sites => _sites;
 
-    public MyServerManager()
+    public Manager(ServerManager serverManager, ServiceController serviceController, ISiteCollection<ISite> sites)
     {
-        _serviceController = new ServiceController("W3SVC");
-        _serverManager = new ServerManager();
-        _sites = new SiteCollection(_serverManager);
+        _serviceController = serviceController;
+        _serverManager = serverManager;
+        _sites = sites;
     }
 
     public void CommitChanges()
