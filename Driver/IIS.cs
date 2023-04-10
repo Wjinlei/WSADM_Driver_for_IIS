@@ -30,7 +30,7 @@ public class IIS : IDriver
                         .AddSingleton<ISiteCollection<ISite>, Models.SiteCollection>()).Build();
 
         return Result<IServerManager>.Ok(
-            host.Services.GetRequiredService<Manager>());
+            host.Services.GetRequiredService<IServerManager>());
     }
 }
 
