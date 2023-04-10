@@ -12,22 +12,25 @@ namespace Driver;
 
 public class IIS : IDriver
 {
+    /// <summary>
+    /// Gets the implementation class for IServerManager
+    /// </summary>
+    /// <param name="path">The WebServer installation path, or null if not required</param>
+    /// <returns></returns>
     public Result<IServerManager> GetServerManager(string? path)
     {
         // Dependency Injection（DI）
         // IoC Container
+        // Registration service
         IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
-            {
-                services.AddSingleton<IServerManager, Manager>();
-                services.AddSingleton<ServerManager>();
-                services.AddSingleton(sp => new ServiceController("W3SVC"));
-                services.AddSingleton<ISiteCollection<ISite>, Models.SiteCollection>();
-            }).Build();
+                services.AddSingleton<IServerManager, Manager>()
+                        .AddSingleton<ServerManager>()
+                        .AddSingleton(sp => new ServiceController("W3SVC"))
+                        .AddSingleton<ISiteCollection<ISite>, Models.SiteCollection>()).Build();
 
         return Result<IServerManager>.Ok(
-            host.Services.GetRequiredService<Manager>()
-            );
+            host.Services.GetRequiredService<Manager>());
     }
 }
 
