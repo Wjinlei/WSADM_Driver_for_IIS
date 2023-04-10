@@ -14,7 +14,11 @@ public class Manager : IServerManager
 
     public ISiteCollection<ISite> Sites => _sites;
 
-    public Manager(ServerManager serverManager, ServiceController serviceController, ISiteCollection<ISite> sites)
+    // Dependency Injection（DI）
+    public Manager(
+        ServerManager serverManager,
+        ServiceController serviceController,
+        ISiteCollection<ISite> sites)
     {
         _serviceController = serviceController;
         _serverManager = serverManager;
@@ -25,18 +29,18 @@ public class Manager : IServerManager
     {
         _serverManager.Sites.Clear();
 
-        foreach (var site in _sites)
+        foreach (var _site in _sites)
         {
-            var bindingDefault = "*:80:";
-            var first = site.Bindings.FirstOrDefault();
-            if (first != null)
-                bindingDefault = first.ToString();
+            var bindingInformation = "*:80:";
+            var firstBinding = _site.Bindings.FirstOrDefault();
+            if (firstBinding != null)
+                bindingInformation = firstBinding.ToString();
 
-            var siteServerManager = _serverManager.Sites.Add(site.Name, "http", bindingDefault, site.PhysicalPath);
-            foreach (var binding in site.Bindings)
+            var site = _serverManager.Sites.Add(_site.Name, "http", bindingInformation, _site.PhysicalPath);
+            foreach (var binding in _site.Bindings)
             {
-                if (binding.ToString() == bindingDefault) continue;
-                siteServerManager.Bindings.Add(binding.ToString(), "http");
+                if (binding.ToString() == bindingInformation) continue;
+                site.Bindings.Add(binding.ToString(), "http");
             }
         }
 
