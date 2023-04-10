@@ -34,13 +34,13 @@ public class Manager : IServerManager
             var bindingInformation = "*:80:";
             var firstBinding = _site.Bindings.FirstOrDefault();
             if (firstBinding != null)
-                bindingInformation = firstBinding.ToString();
+                bindingInformation = firstBinding.ToUrl();
 
             var site = _serverManager.Sites.Add(_site.Name, "http", bindingInformation, _site.PhysicalPath);
             foreach (var binding in _site.Bindings)
             {
-                if (binding.ToString() == bindingInformation) continue;
-                site.Bindings.Add(binding.ToString(), "http");
+                if (binding.ToUrl() == bindingInformation) continue;
+                site.Bindings.Add(binding.ToUrl(), "http");
             }
         }
 

@@ -13,9 +13,14 @@ public class BindingInformation : IBindingInformation
         Port = port;
     }
 
-    public override string ToString()
+    public string ToUrl()
     {
-        return "*:" + Port + ":" + Domain;
+        return "*" + ":" + Port + ":" + Domain;
+    }
+
+    public string ToSimpleUrl()
+    {
+        return Domain + ":" + Port;
     }
 
     public override bool Equals(object? obj)

@@ -15,7 +15,8 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     // Indexer
     public IBindingInformation this[int index] => _list[index];
-    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => binding.ToString() == bindingInformation);
+    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => 
+        binding.ToUrl() == bindingInformation || binding.ToSimpleUrl() == bindingInformation);
 
     // Constructor
     public BindingInformationCollection(SiteCollection sites)
@@ -74,7 +75,8 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public bool Contains(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.ToString() == bindingInformation);
+        var binding = _list.Find(binding =>
+            binding.ToUrl() == bindingInformation || binding.ToSimpleUrl() == bindingInformation);
         if (binding != null) return true;
         return false;
     }
@@ -86,7 +88,8 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public void Remove(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.ToString() == bindingInformation);
+        var binding = _list.Find(binding =>
+            binding.ToUrl() == bindingInformation || binding.ToSimpleUrl() == bindingInformation);
         if (binding != null)
             _ = _list.Remove(binding);
     }
