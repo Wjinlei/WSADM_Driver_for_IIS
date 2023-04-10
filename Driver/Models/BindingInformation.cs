@@ -13,12 +13,12 @@ public class BindingInformation : IBindingInformation
         Port = port;
     }
 
-    public string ToUrl()
+    public string Format()
     {
         return "*" + ":" + Port + ":" + Domain;
     }
 
-    public string ToSimpleUrl()
+    public string FormatSimple()
     {
         return Domain + ":" + Port;
     }
