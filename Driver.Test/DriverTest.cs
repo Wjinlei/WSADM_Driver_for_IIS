@@ -55,7 +55,7 @@ public class Tests
         Assert.That(site, Is.Not.Null);
 
         // Modify binding
-        var bind = site.Bindings["*:80:m.test1.com"];
+        var bind = site.Bindings["m.test1.com:80"];
         Assert.That(bind, Is.Not.Null);
         bind.Port = 8080; // Modify port
 
