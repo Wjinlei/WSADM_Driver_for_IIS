@@ -15,16 +15,19 @@ public class IIS : IDriver
     public Result<IServerManager> GetServerManager(string? path)
     {
         // Dependency Injection（DI）
+        // IoC Container
         IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
-                services.AddSingleton<Manager>()
-                        .AddSingleton<ServerManager>()
-                        .AddSingleton(sp => new ServiceController("W3SVC"))
-                        .AddSingleton<ISiteCollection<ISite>, Models.SiteCollection>())
-            .Build();
+            {
+                services.AddSingleton<IServerManager, Manager>();
+                services.AddSingleton<ServerManager>();
+                services.AddSingleton(sp => new ServiceController("W3SVC"));
+                services.AddSingleton<ISiteCollection<ISite>, Models.SiteCollection>();
+            }).Build();
 
-        var serverManager = host.Services.GetRequiredService<Manager>();
-        return Result<IServerManager>.Ok(serverManager);
+        return Result<IServerManager>.Ok(
+            host.Services.GetRequiredService<Manager>()
+            );
     }
 }
 
