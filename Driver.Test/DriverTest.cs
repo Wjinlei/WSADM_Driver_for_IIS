@@ -24,43 +24,45 @@ public class Tests
     [Test]
     public void TestSiteAdd()
     {
-        //_serverManager.Sites.Add("www.test1.com", "d:/wwwroot", 80);
-        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("www.test1.com", 80);
-        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("bbs.test1.com", 8080);
-        //_serverManager.Sites["www.test1.com"]?.Bindings.Add("m.test1.com", 80);
+        //_serverManager.Sites.Add("www.example.com", "d:/wwwroot", 80);
+        //_serverManager.Sites["www.example.com"]?.Bindings.Add("www.example.com", 80);
+        //_serverManager.Sites["www.example.com"]?.Bindings.Add("bbs.example.com", 8080);
+        //_serverManager.Sites["www.example.com"]?.Bindings.Add("m.example.com", 80);
 
-        _serverManager.Sites.Add("www.test1.com", "d:/wwwroot", new List<string>
+        _serverManager.Sites.Add("www.example.com", "d:/wwwroot", new List<string>
         {
-            "www.test1.com",
-            "bbs.test1.com:8080",
-            "m.test1.com:80"
+            "www.example.com",
+            "bbs.example.com:8080",
+            "m.example.com:80",
+            "127.0.0.1:8080:dev.example.com" // Bind to the specified IP address
         });
     }
 
     [Test]
     public void TestSiteDelete()
     {
-        _serverManager.Sites.Remove("www.test1.com");
+        _serverManager.Sites.Remove("www.example.com");
 
-        //var test1 = _serverManager.Sites["www.test1.com"];
-        //Assert.That(test1, Is.Not.Null);
-        //_serverManager.Sites.Remove(test1);
+        //var example = _serverManager.Sites["www.example.com"];
+        //Assert.That(example, Is.Not.Null);
+        //_serverManager.Sites.Remove(example);
     }
 
     [Test]
     public void TestSiteModify()
     {
         // Get site
-        var site = _serverManager.Sites["www.test1.com"];
-        Assert.That(site, Is.Not.Null);
+        var example = _serverManager.Sites["www.example.com"];
+        Assert.That(example, Is.Not.Null);
 
         // Modify binding
-        var bind = site.Bindings["m.test1.com:80"];
+        var bind = example.Bindings["m.example.com:80"];
         Assert.That(bind, Is.Not.Null);
         bind.Port = 8080; // Modify port
 
-        site.Bindings.Add("new.test1.com:8088"); // Add binding information
-        site.Bindings.Remove("bbs.test1.com:8080"); // Delete binding information
+        example.Bindings.Add("127.0.0.1:9999:test.example.com"); // Add binding information
+        example.Bindings.Add("new.example.com:8088"); // Add binding information
+        example.Bindings.Remove("bbs.example.com:8080"); // Delete binding information
     }
 
     [TearDown]
