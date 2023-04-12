@@ -57,7 +57,7 @@ public class SiteCollection : ISiteCollection<ISite>
     public Result Add(string name, string physicalPath, int port)
     {
         var bindings = new BindingInformationCollection(this);
-        var result = bindings.Add(new BindingInformation("", port));
+        var result = bindings.Add(port);
         if (!result.Success)
             return result;
         return Add(new Site(name, physicalPath, bindings));
@@ -66,7 +66,7 @@ public class SiteCollection : ISiteCollection<ISite>
     public Result Add(string name, string physicalPath, string domain, int port)
     {
         var bindings = new BindingInformationCollection(this);
-        var result = bindings.Add(new BindingInformation(domain, port));
+        var result = bindings.Add(domain, port);
         if (!result.Success)
             return result;
         return Add(new Site(name, physicalPath, bindings));
@@ -80,19 +80,17 @@ public class SiteCollection : ISiteCollection<ISite>
     public Result Add(string name, string physicalPath, List<string> bindings)
     {
         var bindingInformationCollection = new BindingInformationCollection(this);
-        bindings.ForEach(element =>
-        {
-            var binding = element.Split(':');
-            var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
-            var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-
-            // Add bindingInformation
-            bindingInformationCollection.Add(
-                new BindingInformation(
-                    domainNameOrDefault,
-                    Util.Convert.ToInt32OrDefault(portOrDefault, 80)));
-        });
+        bindings.ForEach(element => bindingInformationCollection.Add(element));
         return Add(new Site(name, physicalPath, bindingInformationCollection));
+    }
+
+    public Result Add(string name, string physicalPath, string binding)
+    {
+        var bindings = new BindingInformationCollection(this);
+        var result = bindings.Add(binding);
+        if (!result.Success)
+            return result;
+        return Add(new Site(name, physicalPath, bindings));
     }
 
     // Implementation List

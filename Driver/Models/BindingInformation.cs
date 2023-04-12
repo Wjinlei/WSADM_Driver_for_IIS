@@ -4,21 +4,37 @@ namespace Driver.Models;
 
 public class BindingInformation : IBindingInformation
 {
-    public string Domain { get; set; }
+    public string IpAddr { get; set; }
     public int Port { get; set; }
+    public string Domain { get; set; }
+
+    public BindingInformation(int port)
+    {
+        IpAddr = "*";
+        Port = port;
+        Domain = "";
+    }
 
     public BindingInformation(string domain, int port)
     {
-        Domain = domain;
+        IpAddr = "*";
         Port = port;
+        Domain = domain;
     }
 
-    public string Format()
+    public BindingInformation(string ipAddr, string domain, int port)
     {
-        return "*" + ":" + Port + ":" + Domain;
+        IpAddr = ipAddr;
+        Port = port;
+        Domain = domain;
     }
 
-    public string FormatSimple()
+    public string ToBind()
+    {
+        return IpAddr + ":" + Port + ":" + Domain;
+    }
+
+    public string ToUrl()
     {
         return Domain + ":" + Port;
     }
@@ -26,8 +42,9 @@ public class BindingInformation : IBindingInformation
     public override bool Equals(object? obj)
     {
         return obj is BindingInformation information &&
-               Domain == information.Domain &&
-               Port == information.Port;
+               IpAddr == information.IpAddr &&
+               Port == information.Port &&
+               Domain == information.Domain;
     }
 
     public override int GetHashCode()

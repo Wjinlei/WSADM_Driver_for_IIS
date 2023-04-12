@@ -15,8 +15,8 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     // Indexer
     public IBindingInformation this[int index] => _list[index];
-    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => 
-        binding.Format() == bindingInformation || binding.FormatSimple() == bindingInformation);
+    public IBindingInformation? this[string bindingInformation] => _list.Find(binding =>
+        binding.ToBind() == bindingInformation || binding.ToUrl() == bindingInformation);
 
     // Constructor
     public BindingInformationCollection(SiteCollection sites)
@@ -31,6 +31,8 @@ public class BindingInformationCollection : IBindingInformationCollection
         // Check parameter
         if (bindingInformation.Port < 1 || bindingInformation.Port > 65535)
             return Result.Error(new ArgumentException(nameof(bindingInformation.Port)));
+        if (bindingInformation.IpAddr != "*" && !Mojito.Validator.IsIp(bindingInformation.IpAddr))
+            return Result.Error(new ArgumentException(nameof(bindingInformation.IpAddr)));
         if (_list.Contains(bindingInformation))
             return Result.Error(new ArgumentException("This binding information already exists"));
         if (_sites.Any(site => site.Bindings.Contains(bindingInformation)))
@@ -40,26 +42,41 @@ public class BindingInformationCollection : IBindingInformationCollection
         return Result.Ok;
     }
 
+    public Result Add(string ipAddr, string domain, int port)
+    {
+        return Add(new BindingInformation(ipAddr, domain, port));
+    }
+
+    public Result Add(int port)
+    {
+        return Add(new BindingInformation(port));
+    }
+
     public Result Add(string domain, int port)
     {
         return Add(new BindingInformation(domain, port));
     }
 
-    public Result Add(int port)
-    {
-        return Add(new BindingInformation("", port));
-    }
-
     public Result Add(string bindingInformation)
     {
         var binding = bindingInformation.Split(":");
-        var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
-        var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-
-        return Add(
-            new BindingInformation(
-                domainNameOrDefault,
-                Util.Convert.ToInt32OrDefault(portOrDefault, 80)));
+        if (binding.Length < 3)
+        {
+            // Example: www.example.com:8080
+            var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
+            var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
+            return Add(new BindingInformation(domainNameOrDefault,
+                Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
+        }
+        else
+        {
+            // Example: 127.0.0.1:8080:www.example.com
+            var ipAddrOrDefault = binding.ElementAtOrDefault(0) ?? "*";
+            var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
+            var domainNameOrDefault = binding.ElementAtOrDefault(2) ?? "";
+            return Add(new BindingInformation(ipAddrOrDefault,
+                domainNameOrDefault, Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
+        }
     }
 
     // Implementation List
@@ -76,7 +93,7 @@ public class BindingInformationCollection : IBindingInformationCollection
     public bool Contains(string bindingInformation)
     {
         var binding = _list.Find(binding =>
-            binding.Format() == bindingInformation || binding.FormatSimple() == bindingInformation);
+            binding.ToBind() == bindingInformation || binding.ToUrl() == bindingInformation);
         if (binding != null) return true;
         return false;
     }
@@ -89,7 +106,7 @@ public class BindingInformationCollection : IBindingInformationCollection
     public void Remove(string bindingInformation)
     {
         var binding = _list.Find(binding =>
-            binding.Format() == bindingInformation || binding.FormatSimple() == bindingInformation);
+            binding.ToBind() == bindingInformation || binding.ToUrl() == bindingInformation);
         if (binding != null)
             _ = _list.Remove(binding);
     }
