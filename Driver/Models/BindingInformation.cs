@@ -31,17 +31,23 @@ public class BindingInformation : IBindingInformation
         Port = port;
         IpAddr = ipAddr;
     }
+    public override string? ToString()
+    {
+        return Host;
+    }
 
     public override bool Equals(object? obj)
     {
         return obj is BindingInformation information &&
                DomainName == information.DomainName &&
                Port == information.Port &&
-               IpAddr == information.IpAddr;
+               IpAddr == information.IpAddr &&
+               EndPoint == information.EndPoint &&
+               Host == information.Host;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(DomainName, Port);
+        return HashCode.Combine(DomainName, Port, IpAddr, EndPoint, Host);
     }
 }
