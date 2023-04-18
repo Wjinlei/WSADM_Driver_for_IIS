@@ -32,8 +32,10 @@ public class SiteCollection : ISiteCollection<ISite>
             {
                 bindingCollection.Add(new Binding(binding.Host, binding.EndPoint.Port));
             }
-            var s = new Site(site.Name, site.Applications["/"].VirtualDirectories["/"].PhysicalPath, bindingCollection);
-            _sites.Add(s);
+            _sites.Add(new Site(
+                site.Name,
+                site.Applications["/"].VirtualDirectories["/"].PhysicalPath,
+                bindingCollection));
         }
     }
 
