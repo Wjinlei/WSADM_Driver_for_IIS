@@ -34,7 +34,7 @@ public class Binding : IBindingInformation
 
     public override string? ToString()
     {
-        return Host;
+        return BindingInformation;
     }
 
     public override bool Equals(object? obj)
