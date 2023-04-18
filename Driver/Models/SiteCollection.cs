@@ -8,26 +8,26 @@ namespace Driver.Models;
 public class SiteCollection : ISiteCollection<ISite>
 {
     // Private
-    private readonly ServerManager _serverManager;
     private readonly List<ISite> _sites;
+    private readonly ServerManager _serverManager;
 
     // Public
     public int Count => _sites.Count;
 
     // Indexer
-    public ISite this[int index] { get => _sites[index]; }
+    public ISite this[int index] => _sites[index];
     public ISite? this[string name] => _sites.Find(s => s.Name == name);
 
     // Constructor
     public SiteCollection(ServerManager serverManager)
     {
-        _serverManager = serverManager;
         _sites = new List<ISite>();
+        _serverManager = serverManager;
 
         // Load Sites
         foreach (var site in _serverManager.Sites)
         {
-            var bindingInformationCollection = new BindingInformationCollection(this);
+            var bindingInformationCollection = new BindingInformationCollection();
             foreach (var binding in site.Bindings)
             {
                 bindingInformationCollection.Add(new BindingInformation(binding.Host, binding.EndPoint.Port));
@@ -41,74 +41,51 @@ public class SiteCollection : ISiteCollection<ISite>
     public Result Add(ISite site)
     {
         // Check parameter
-        if (site.Bindings.Count < 1)
-            return Result.Error(new ArgumentException("The binding information cannot be empty"));
-        if (string.IsNullOrWhiteSpace(site.Name))
-            return Result.Error(new ArgumentException("The site name cannot be empty"));
-        if (string.IsNullOrWhiteSpace(site.PhysicalPath))
-            return Result.Error(new ArgumentException("The physical path cannot be empty"));
-        if (_sites.Contains(site))
-            return Result.Error(new ArgumentException("This site already exists"));
+        var result = this.Check(site);
+        if (result.Success)
+            _sites.Add(site);
+        return result;
+    }
 
-        _sites.Add(site);
-        return Result.Ok;
+    public Result Add(
+        string name,
+        string physicalPath,
+        IBindingInformationCollection bindings)
+    {
+        return Add(new Site(name, physicalPath, bindings));
     }
 
     public Result Add(string name, string physicalPath, int port)
     {
-        var bindings = new BindingInformationCollection(this);
-        var result = bindings.Add(port);
-        if (!result.Success)
-            return result;
-        return Add(new Site(name, physicalPath, bindings));
+        return Add(name, physicalPath, ":" + port);
     }
 
     public Result Add(string name, string physicalPath, string domain, int port)
     {
-        var bindings = new BindingInformationCollection(this);
-        var result = bindings.Add(domain, port);
-        if (!result.Success)
-            return result;
-        return Add(new Site(name, physicalPath, bindings));
-    }
-
-    public Result Add(string name, string physicalPath, IBindingInformationCollection bindings)
-    {
-        return Add(new Site(name, physicalPath, bindings));
-    }
-
-    public Result Add(string name, string physicalPath, List<string> bindings)
-    {
-        var bindingInformationCollection = new BindingInformationCollection(this);
-        bindings.ForEach(element => bindingInformationCollection.Add(element));
-        return Add(new Site(name, physicalPath, bindingInformationCollection));
+        return Add(name, physicalPath, domain + ":" + port);
     }
 
     public Result Add(string name, string physicalPath, string binding)
     {
-        var bindings = new BindingInformationCollection(this);
-        var result = bindings.Add(binding);
+        var bindingInformationCollection = new BindingInformationCollection();
+        var result = bindingInformationCollection.Add(binding);
         if (!result.Success)
             return result;
-        return Add(new Site(name, physicalPath, bindings));
+
+        return Add(new Site(name, physicalPath, bindingInformationCollection));
+    }
+
+    public Result Add(string name, string physicalPath, List<string> bindings)
+    {
+        var bindingInformationCollection = new BindingInformationCollection();
+        bindings.ForEach(element => bindingInformationCollection.Add(element));
+        return Add(new Site(name, physicalPath, bindingInformationCollection));
     }
 
     // Implementation List
-    public ISite? Find(Predicate<ISite> match)
+    public void Clear()
     {
-        return _sites.Find(match);
-    }
-
-    public bool Contains(ISite site)
-    {
-        return _sites.Contains(site);
-    }
-
-    public bool Contains(string name)
-    {
-        var site = _sites.Find(site => site.Name == name);
-        if (site != null) return true;
-        return false;
+        _sites.Clear();
     }
 
     public void Remove(ISite site)
@@ -123,9 +100,19 @@ public class SiteCollection : ISiteCollection<ISite>
             _sites.Remove(site);
     }
 
-    public void Clear()
+    public bool Contains(ISite site)
     {
-        _sites.Clear();
+        return _sites.Contains(site);
+    }
+
+    public bool Contains(string name)
+    {
+        return _sites.Find(site => site.Name == name) != null;
+    }
+
+    public ISite? Find(Predicate<ISite> match)
+    {
+        return _sites.Find(match);
     }
 
     // Implementation iterator
