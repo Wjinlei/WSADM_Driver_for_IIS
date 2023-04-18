@@ -3,7 +3,7 @@ using WSADM.Interfaces;
 
 namespace Driver.Models;
 
-public static class BindingInformationCollectionExtensions
+public static class BindingCollectionExtensions
 {
     public static Result Check(
         this IBindingInformationCollection bindingInformationCollection,

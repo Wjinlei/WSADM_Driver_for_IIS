@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Driver.Models;
 
-public class BindingInformationCollection : IBindingInformationCollection
+public class BindingCollection : IBindingInformationCollection
 {
     // Private
     private readonly List<IBindingInformation> _list;
@@ -15,10 +15,10 @@ public class BindingInformationCollection : IBindingInformationCollection
     // Indexer
     public IBindingInformation this[int index] => _list[index];
     public IBindingInformation? this[string bindingInformation] => _list.Find(binding =>
-        binding.Host == bindingInformation || binding.EndPoint == bindingInformation);
+        binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation);
 
     // Constructor
-    public BindingInformationCollection()
+    public BindingCollection()
     {
         _list = new List<IBindingInformation>();
     }
@@ -35,17 +35,17 @@ public class BindingInformationCollection : IBindingInformationCollection
 
     public Result Add(int port)
     {
-        return Add(new BindingInformation(port));
+        return Add(new Binding(port));
     }
 
     public Result Add(string domain, int port)
     {
-        return Add(new BindingInformation(domain, port));
+        return Add(new Binding(domain, port));
     }
 
     public Result Add(string ipAddr, string domain, int port)
     {
-        return Add(new BindingInformation(ipAddr, domain, port));
+        return Add(new Binding(ipAddr, domain, port));
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class BindingInformationCollection : IBindingInformationCollection
             // Example: www.example.com:8080
             var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
             var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-            return Add(new BindingInformation(
+            return Add(new Binding(
                 domainNameOrDefault,
                 Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
         }
@@ -71,7 +71,7 @@ public class BindingInformationCollection : IBindingInformationCollection
             var ipAddrOrDefault = binding.ElementAtOrDefault(0) ?? "*";
             var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
             var domainNameOrDefault = binding.ElementAtOrDefault(2) ?? "";
-            return Add(new BindingInformation(
+            return Add(new Binding(
                 ipAddrOrDefault,
                 domainNameOrDefault,
                 Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
@@ -84,26 +84,26 @@ public class BindingInformationCollection : IBindingInformationCollection
         _list.Clear();
     }
 
+    public void Remove(string bindingInformation)
+    {
+        var binding = _list.Find(binding => binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation);
+        if (binding != null)
+            _ = _list.Remove(binding);
+    }
+
     public void Remove(IBindingInformation bindingInformation)
     {
         _list.Remove(bindingInformation);
     }
 
-    public void Remove(string bindingInformation)
+    public bool Contains(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.Host == bindingInformation || binding.EndPoint == bindingInformation);
-        if (binding != null)
-            _ = _list.Remove(binding);
+        return _list.Find(binding => binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation) != null;
     }
 
     public bool Contains(IBindingInformation bindingInformation)
     {
         return _list.Contains(bindingInformation);
-    }
-
-    public bool Contains(string bindingInformation)
-    {
-        return _list.Find(binding => binding.Host == bindingInformation || binding.EndPoint == bindingInformation) != null;
     }
 
     public IBindingInformation? Find(Predicate<IBindingInformation> match)
@@ -125,7 +125,7 @@ public class BindingInformationCollection : IBindingInformationCollection
     // Implementation comparator
     public override bool Equals(object? obj)
     {
-        return obj is BindingInformationCollection collection &&
+        return obj is BindingCollection collection &&
                EqualityComparer<List<IBindingInformation>>.Default.Equals(_list, collection._list) &&
                Count == collection.Count;
     }

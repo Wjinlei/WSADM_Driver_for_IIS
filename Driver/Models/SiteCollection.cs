@@ -27,12 +27,12 @@ public class SiteCollection : ISiteCollection<ISite>
         // Load Sites
         foreach (var site in _serverManager.Sites)
         {
-            var bindingInformationCollection = new BindingInformationCollection();
+            var bindingCollection = new BindingCollection();
             foreach (var binding in site.Bindings)
             {
-                bindingInformationCollection.Add(new BindingInformation(binding.Host, binding.EndPoint.Port));
+                bindingCollection.Add(new Binding(binding.Host, binding.EndPoint.Port));
             }
-            var s = new Site(site.Name, site.Applications["/"].VirtualDirectories["/"].PhysicalPath, bindingInformationCollection);
+            var s = new Site(site.Name, site.Applications["/"].VirtualDirectories["/"].PhysicalPath, bindingCollection);
             _sites.Add(s);
         }
     }
@@ -67,30 +67,25 @@ public class SiteCollection : ISiteCollection<ISite>
 
     public Result Add(string name, string physicalPath, string binding)
     {
-        var bindingInformationCollection = new BindingInformationCollection();
-        var result = bindingInformationCollection.Add(binding);
+        var bindingCollection = new BindingCollection();
+        var result = bindingCollection.Add(binding);
         if (!result.Success)
             return result;
 
-        return Add(new Site(name, physicalPath, bindingInformationCollection));
+        return Add(new Site(name, physicalPath, bindingCollection));
     }
 
     public Result Add(string name, string physicalPath, List<string> bindings)
     {
-        var bindingInformationCollection = new BindingInformationCollection();
-        bindings.ForEach(element => bindingInformationCollection.Add(element));
-        return Add(new Site(name, physicalPath, bindingInformationCollection));
+        var bindingCollection = new BindingCollection();
+        bindings.ForEach(element => bindingCollection.Add(element));
+        return Add(new Site(name, physicalPath, bindingCollection));
     }
 
     // Implementation List
     public void Clear()
     {
         _sites.Clear();
-    }
-
-    public void Remove(ISite site)
-    {
-        _sites.Remove(site);
     }
 
     public void Remove(string name)
@@ -100,14 +95,19 @@ public class SiteCollection : ISiteCollection<ISite>
             _sites.Remove(site);
     }
 
-    public bool Contains(ISite site)
+    public void Remove(ISite site)
     {
-        return _sites.Contains(site);
+        _sites.Remove(site);
     }
 
     public bool Contains(string name)
     {
         return _sites.Find(site => site.Name == name) != null;
+    }
+
+    public bool Contains(ISite site)
+    {
+        return _sites.Contains(site);
     }
 
     public ISite? Find(Predicate<ISite> match)
