@@ -4,51 +4,44 @@ namespace Driver.Models;
 
 public class BindingInformation : IBindingInformation
 {
-    public string IpAddr { get; set; }
+    public string DomainName { get; set; }
     public int Port { get; set; }
-    public string Domain { get; set; }
+    public string IpAddr { get; set; }
+
+    public string EndPoint => DomainName + ":" + Port;
+    public string Host => IpAddr + ":" + Port + ":" + DomainName;
 
     public BindingInformation(int port)
     {
-        IpAddr = "*";
+        DomainName = "";
         Port = port;
-        Domain = "";
+        IpAddr = "*";
     }
 
     public BindingInformation(string domain, int port)
     {
-        IpAddr = "*";
+        DomainName = domain;
         Port = port;
-        Domain = domain;
+        IpAddr = "*";
     }
 
     public BindingInformation(string ipAddr, string domain, int port)
     {
-        IpAddr = ipAddr;
+        DomainName = domain;
         Port = port;
-        Domain = domain;
-    }
-
-    public string ToBind()
-    {
-        return IpAddr + ":" + Port + ":" + Domain;
-    }
-
-    public string ToUrl()
-    {
-        return Domain + ":" + Port;
+        IpAddr = ipAddr;
     }
 
     public override bool Equals(object? obj)
     {
         return obj is BindingInformation information &&
-               IpAddr == information.IpAddr &&
+               DomainName == information.DomainName &&
                Port == information.Port &&
-               Domain == information.Domain;
+               IpAddr == information.IpAddr;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Domain, Port);
+        return HashCode.Combine(DomainName, Port);
     }
 }
