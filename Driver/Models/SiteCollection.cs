@@ -27,10 +27,13 @@ public class SiteCollection : ISiteCollection<ISite>
         // Load Sites
         foreach (var site in _serverManager.Sites)
         {
-            var bindingCollection = new BindingCollection();
+            var bindingCollection = new BindingCollection(this);
             foreach (var binding in site.Bindings)
             {
-                bindingCollection.Add(new Binding(binding.Host, binding.EndPoint.Port));
+                bindingCollection.Add(new Binding(
+                    binding.EndPoint.Address.ToString(),
+                    binding.Host,
+                    binding.EndPoint.Port));
             }
             _sites.Add(new Site(
                 site.Name,
@@ -69,7 +72,7 @@ public class SiteCollection : ISiteCollection<ISite>
 
     public Result Add(string name, string physicalPath, string binding)
     {
-        var bindingCollection = new BindingCollection();
+        var bindingCollection = new BindingCollection(this);
         var result = bindingCollection.Add(binding);
         if (!result.Success)
             return result;
@@ -79,8 +82,13 @@ public class SiteCollection : ISiteCollection<ISite>
 
     public Result Add(string name, string physicalPath, List<string> bindings)
     {
-        var bindingCollection = new BindingCollection();
-        bindings.ForEach(element => bindingCollection.Add(element));
+        var bindingCollection = new BindingCollection(this);
+        foreach (var binding in bindings)
+        {
+            var result = bindingCollection.Add(binding);
+            if (!result.Success)
+                return result;
+        }
         return Add(new Site(name, physicalPath, bindingCollection));
     }
 

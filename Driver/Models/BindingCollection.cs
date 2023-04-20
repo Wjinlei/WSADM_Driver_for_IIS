@@ -8,6 +8,7 @@ public class BindingCollection : IBindingInformationCollection
 {
     // Private
     private readonly List<IBindingInformation> _list;
+    private readonly ISiteCollection<ISite> _sites;
 
     // Public
     public int Count => _list.Count;
@@ -18,16 +19,17 @@ public class BindingCollection : IBindingInformationCollection
         binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation);
 
     // Constructor
-    public BindingCollection()
+    public BindingCollection(ISiteCollection<ISite> sites)
     {
         _list = new List<IBindingInformation>();
+        _sites = sites;
     }
 
     // Methods
     // Check parameter
     public Result Add(IBindingInformation bindingInformation)
     {
-        var result = this.Check(bindingInformation);
+        var result = this.Check(bindingInformation, _sites);
         if (result.Success)
             _list.Add(bindingInformation);
         return result;
@@ -126,12 +128,11 @@ public class BindingCollection : IBindingInformationCollection
     public override bool Equals(object? obj)
     {
         return obj is BindingCollection collection &&
-               EqualityComparer<List<IBindingInformation>>.Default.Equals(_list, collection._list) &&
-               Count == collection.Count;
+            _list.Intersect(collection._list).Any();
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(_list, Count);
+        return 0;
     }
 }

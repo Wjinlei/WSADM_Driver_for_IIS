@@ -19,13 +19,12 @@ public class Site : ISite
 
     public override bool Equals(object? obj)
     {
-        return obj is Site site &&
-               Name == site.Name &&
-               EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings);
+        return obj is Site site && (Name == site.Name ||
+            EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings));
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, Bindings);
+        return 0;
     }
 }

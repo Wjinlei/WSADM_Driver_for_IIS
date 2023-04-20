@@ -9,18 +9,27 @@ public class Binding : IBindingInformation
     public string Host { get; set; }
 
     public string EndPoint => Host + ":" + Port;
-    public string BindingInformation => Address + ":" + Port + ":" + Host;
+    public string BindingInformation
+    {
+        get
+        {
+            if (Address == "0.0.0.0")
+                return "*" + ":" + Port + ":" + Host;
+            return Address + ":" + Port + ":" + Host;
+        }
+    }
+
 
     public Binding(int port)
     {
-        Address = "*";
+        Address = "0.0.0.0";
         Port = port;
         Host = "";
     }
 
     public Binding(string domain, int port)
     {
-        Address = "*";
+        Address = "0.0.0.0";
         Port = port;
         Host = domain;
     }
