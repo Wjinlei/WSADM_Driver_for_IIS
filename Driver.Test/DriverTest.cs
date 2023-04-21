@@ -29,13 +29,16 @@ public class Tests
         //_serverManager.Sites["www.example.com"]?.Bindings.Add("bbs.example.com", 8080);
         //_serverManager.Sites["www.example.com"]?.Bindings.Add("m.example.com", 80);
 
-        _serverManager.Sites.Add("www.example.com", "d:/wwwroot", new List<string>
+        var result = _serverManager.Sites.Add("www.example.com", "d:/wwwroot", new List<string>
         {
             "www.example.com",
             "bbs.example.com:8080",
             "m.example.com:80",
             "127.0.0.1:8080:dev.example.com" // Bind to the specified IP address
         });
+        if (!result.Success)
+            TestContext.Out.WriteLine(result.Message);
+        Assert.That(result.Success, Is.True);
     }
 
     [Test]
