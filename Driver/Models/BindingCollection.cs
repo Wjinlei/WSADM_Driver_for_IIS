@@ -59,10 +59,8 @@ public class BindingCollection : IBindingInformationCollection
     {
         var binding = bindingInformation.Split(":");
 
-        var ipAddrOrDefault = binding.ElementAtOrDefault(
-            binding.Length > 2 ? 0 : -1) ?? "0.0.0.0";
-        var domainNameOrDefault = binding.ElementAtOrDefault(
-            binding.Length > 2 ? 2 : 0) ?? "";
+        var ipAddrOrDefault = binding.ElementAtOrDefault(binding.Length > 2 ? 0 : -1) ?? "0.0.0.0";
+        var domainNameOrDefault = binding.ElementAtOrDefault(binding.Length > 2 ? 2 : 0) ?? "";
         var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
 
         return Add(new Binding(
