@@ -1,6 +1,6 @@
-﻿using WSADM;
+﻿using System.Collections;
+using WSADM;
 using WSADM.Interfaces;
-using System.Collections;
 
 namespace Driver.Models;
 
@@ -58,26 +58,17 @@ public class BindingCollection : IBindingInformationCollection
     public Result Add(string bindingInformation)
     {
         var binding = bindingInformation.Split(":");
-        if (binding.Length < 3)
-        {
-            // Example: www.example.com:8080
-            var domainNameOrDefault = binding.ElementAtOrDefault(0) ?? "";
-            var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-            return Add(new Binding(
-                domainNameOrDefault,
-                Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
-        }
-        else
-        {
-            // Example: 127.0.0.1:8080:www.example.com
-            var ipAddrOrDefault = binding.ElementAtOrDefault(0) ?? "*";
-            var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-            var domainNameOrDefault = binding.ElementAtOrDefault(2) ?? "";
-            return Add(new Binding(
-                ipAddrOrDefault,
-                domainNameOrDefault,
-                Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
-        }
+
+        var ipAddrOrDefault = binding.ElementAtOrDefault(
+            binding.Length > 2 ? 0 : -1) ?? "0.0.0.0";
+        var domainNameOrDefault = binding.ElementAtOrDefault(
+            binding.Length > 2 ? 2 : 0) ?? "";
+        var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
+
+        return Add(new Binding(
+            ipAddrOrDefault,
+            domainNameOrDefault,
+            Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
     }
 
     // Implementation List
