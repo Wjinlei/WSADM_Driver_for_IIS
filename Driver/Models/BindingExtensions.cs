@@ -7,7 +7,7 @@ public static class BindingExtensions
 {
     public static Result Check(this IBindingInformation bindingInformation)
     {
-        if (bindingInformation.Address != "*"
+        if (bindingInformation.Address != "0.0.0.0"
             && !Mojito.Validator.IsIp(bindingInformation.Address))
             return Result.Error(new ArgumentException(nameof(bindingInformation.Address)));
 
