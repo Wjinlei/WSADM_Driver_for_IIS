@@ -51,7 +51,7 @@ public class BindingCollection : IBindingInformationCollection
     }
 
     /// <summary>
-    /// Todo: This function always feels a little verbose
+    /// Adding binding information
     /// </summary>
     /// <param name="bindingInformation"></param>
     /// <returns></returns>
