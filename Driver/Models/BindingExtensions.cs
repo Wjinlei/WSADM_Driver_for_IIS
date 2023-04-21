@@ -11,8 +11,7 @@ public static class BindingExtensions
             && !Mojito.Validator.IsIp(bindingInformation.Address))
             return Result.Error(new ArgumentException(nameof(bindingInformation.Address)));
 
-        if (bindingInformation.Port < 1 ||
-            bindingInformation.Port > 65535)
+        if (bindingInformation.Port < 1 || bindingInformation.Port > 65535)
             return Result.Error(new ArgumentException(nameof(bindingInformation.Port)));
 
         return Result.Ok;
