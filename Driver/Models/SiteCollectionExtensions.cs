@@ -12,7 +12,8 @@ public static class SiteCollectionExtensions
             return result;
 
         if (sites.Contains(site))
-            return Result.Error(new ArgumentException("The site name already exists"));
+            return Result.Error(new ArgumentException(
+                $"The site name [{site.Name}] already exists"));
 
         return Result.Ok;
     }
