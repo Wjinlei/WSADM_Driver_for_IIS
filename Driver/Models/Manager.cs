@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA1416 // 验证平台兼容性，由于这本来就是IIS用的Dll，因此禁用这个检查
+﻿#pragma warning disable CA1416 // ServiceController 只支持Windows，但这个dll本就是给windows用的，因此忽略这个警告
 
 using Microsoft.Web.Administration;
 using System.ServiceProcess;
@@ -15,14 +15,11 @@ public class Manager : IServerManager
     public ISiteCollection<ISite> Sites => _sites;
 
     // Dependency Injection（DI）
-    public Manager(
-        ServerManager serverManager,
-        ServiceController serviceController,
-        ISiteCollection<ISite> sites)
+    public Manager()
     {
-        _serviceController = serviceController;
-        _serverManager = serverManager;
-        _sites = sites;
+        _serviceController = new ServiceController("W3SVC");
+        _serverManager = new ServerManager();
+        _sites = new SiteCollection(_serverManager);
     }
 
     public void CommitChanges()
@@ -69,4 +66,4 @@ public class Manager : IServerManager
     }
 }
 
-#pragma warning restore CA1416 // 验证平台兼容性，由于这本来就是IIS用的Dll，因此禁用这个检查
+#pragma warning restore CA1416 // ServiceController 只支持Windows，但这个dll本就是给windows用的，因此忽略这个警告
