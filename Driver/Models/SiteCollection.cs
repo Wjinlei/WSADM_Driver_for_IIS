@@ -92,12 +92,17 @@ public class SiteCollection : ISiteCollection<ISite>
         return Add(new Site(name, physicalPath, bindingCollection));
     }
 
-    // Implementation List
+    /// <summary>
+    /// Removes all elements from List<T>.
+    /// </summary>
     public void Clear()
     {
         _sites.Clear();
     }
 
+    /// <summary>
+    /// Find and Removes the first match of a particular object from List<T>.
+    /// </summary>
     public void Remove(string name)
     {
         var site = _sites.Find(site => site.Name == name);
@@ -105,32 +110,51 @@ public class SiteCollection : ISiteCollection<ISite>
             _sites.Remove(site);
     }
 
+    /// <summary>
+    /// Removes the first match of a particular object from List<T>.
+    /// </summary>
     public void Remove(ISite site)
     {
         _sites.Remove(site);
     }
 
+    /// <summary>
+    /// Determines if a site is in List<T>.
+    /// </summary>
     public bool Contains(string name)
     {
         return _sites.Find(site => site.Name == name) != null;
     }
 
+    /// <summary>
+    /// Determines if a site is in List<T>.
+    /// </summary>
     public bool Contains(ISite site)
     {
         return _sites.Contains(site);
     }
 
+    /// <summary>
+    /// Searches for site that matches the condition defined by the specified predicate and returns the first matching element in the entire List<T>.
+    /// </summary>
     public ISite? Find(Predicate<ISite> match)
     {
         return _sites.Find(match);
     }
 
-    // Implementation iterator
+    /// <summary>
+    /// Implementation iterator
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator<ISite> GetEnumerator()
     {
         return _sites.GetEnumerator();
     }
 
+    /// <summary>
+    /// Implementation iterator
+    /// </summary>
+    /// <returns></returns>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

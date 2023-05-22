@@ -9,6 +9,7 @@ public class Binding : IBindingInformation
     public string Host { get; set; }
 
     public string EndPoint => Host + ":" + Port;
+
     public string BindingInformation
     {
         get
@@ -41,21 +42,31 @@ public class Binding : IBindingInformation
         Host = domain;
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <returns></returns>
     public override string? ToString()
     {
         return BindingInformation;
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <param name="obj">Compare object</param>
+    /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is Binding binding &&
-               Address == binding.Address &&
-               Port == binding.Port &&
-               Host == binding.Host;
+        return obj is Binding binding && Address == binding.Address;
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
-        return HashCode.Combine(Address, Port, Host);
+        return HashCode.Combine(Port, Host);
     }
 }

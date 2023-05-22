@@ -17,14 +17,23 @@ public class Site : ISite
         Bindings = bindings;
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is Site site && (Name == site.Name ||
-            EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings));
+        return obj is Site site
+            && EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings);
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
-        return 0;
+        return HashCode.Combine(Name);
     }
 }

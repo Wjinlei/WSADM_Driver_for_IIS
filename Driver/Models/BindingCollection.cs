@@ -69,57 +69,94 @@ public class BindingCollection : IBindingInformationCollection
             Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
     }
 
-    // Implementation List
+    /// <summary>
+    /// Removes all elements from List<T>.
+    /// </summary>
     public void Clear()
     {
         _list.Clear();
     }
 
+    /// <summary>
+    /// Find and Removes the first match of a particular object from List<T>.
+    /// </summary>
     public void Remove(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation);
+        var binding = _list.Find(binding
+            => binding.BindingInformation == bindingInformation
+            || binding.EndPoint == bindingInformation);
+
         if (binding != null)
-            _ = _list.Remove(binding);
+            _list.Remove(binding);
     }
 
+    /// <summary>
+    /// Removes the first match of a particular object from List<T>.
+    /// </summary>
     public void Remove(IBindingInformation bindingInformation)
     {
         _list.Remove(bindingInformation);
     }
 
+    /// <summary>
+    /// Determines if a binding information is in List<T>.
+    /// </summary>
     public bool Contains(string bindingInformation)
     {
-        return _list.Find(binding => binding.BindingInformation == bindingInformation || binding.EndPoint == bindingInformation) != null;
+        return _list.Find(binding
+            => binding.BindingInformation == bindingInformation
+            || binding.EndPoint == bindingInformation) != null;
     }
 
+    /// <summary>
+    /// Determines if a binding information is in List<T>.
+    /// </summary>
     public bool Contains(IBindingInformation bindingInformation)
     {
         return _list.Contains(bindingInformation);
     }
 
+    /// <summary>
+    /// Searches for binding information that matches the condition defined by the specified predicate and returns the first matching element in the entire List<T>.
+    /// </summary>
     public IBindingInformation? Find(Predicate<IBindingInformation> match)
     {
         return _list.Find(match);
     }
 
-    // Implementation iterator
+    /// <summary>
+    /// Implementation iterator
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator<IBindingInformation> GetEnumerator()
     {
         return _list.GetEnumerator();
     }
 
+    /// <summary>
+    /// Implementation iterator
+    /// </summary>
+    /// <returns></returns>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
-    // Implementation comparator
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <param name="obj">Compare object</param>
+    /// <returns></returns>
     public override bool Equals(object? obj)
     {
         return obj is BindingCollection collection &&
             _list.Intersect(collection._list).Any();
     }
 
+    /// <summary>
+    /// Override
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
         return 0;
