@@ -14,7 +14,6 @@ public class Manager : IServerManager
 
     public ISiteCollection<ISite> Sites => _sites;
 
-    // Dependency Injection（DI）
     public Manager()
     {
         _serviceController = new ServiceController("W3SVC");
@@ -26,19 +25,33 @@ public class Manager : IServerManager
     {
         _serverManager.Sites.Clear();
 
+        // Add sites
         foreach (var _site in _sites)
         {
-            var bindingInformation = "*:80:";
-            var firstBinding = _site.Bindings.FirstOrDefault();
-            if (firstBinding != null)
-                bindingInformation = firstBinding.BindingInformation;
+            // The first binding information for the site
+            var _first = _site.Bindings.FirstOrDefault(new Binding("", 80));
 
-            var site = _serverManager.Sites.Add(_site.Name, "http", bindingInformation, _site.PhysicalPath);
+            // Add sites using ServerManager
+            var site = _serverManager.Sites.Add(
+                _site.Name,
+                "http",
+                _first.BindingInformation,
+                _site.PhysicalPath
+                );
+
+            // Continue adding the remaining binding information
             foreach (var binding in _site.Bindings)
             {
-                if (binding.BindingInformation == bindingInformation) continue;
+                if (binding.BindingInformation == _first.BindingInformation) continue;
                 site.Bindings.Add(binding.BindingInformation, "http");
             }
+
+            // Configuration site
+            // Limits
+            site.Limits.ConnectionTimeout = _site.Limits.ConnectionTimeout;
+            site.Limits.MaxUrlSegments = _site.Limits.MaxUrlSegments;
+            site.Limits.MaxConnections = _site.Limits.MaxConnections;
+            site.Limits.MaxBandwidth = _site.Limits.MaxBandwidth;
         }
 
         _serverManager.CommitChanges();

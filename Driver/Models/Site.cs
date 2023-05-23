@@ -8,6 +8,7 @@ public class Site : ISite
     public string PhysicalPath { get; set; }
     public string RunPath { get; set; }
     public IBindingInformationCollection Bindings { get; set; }
+    public ISiteLimits Limits { get; set; }
 
     public Site(string name, string physicalPath, IBindingInformationCollection bindings)
     {
@@ -15,6 +16,7 @@ public class Site : ISite
         PhysicalPath = physicalPath;
         RunPath = physicalPath;
         Bindings = bindings;
+        Limits = new SiteLimits(TimeSpan.FromSeconds(120), 32, 4294967295, 4294967295);
     }
 
     /// <summary>

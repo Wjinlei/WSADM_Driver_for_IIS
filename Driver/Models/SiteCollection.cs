@@ -24,21 +24,34 @@ public class SiteCollection : ISiteCollection<ISite>
         _sites = new List<ISite>();
         _serverManager = serverManager;
 
-        // Load Sites
+        // Load all sites from ServerManager
         foreach (var site in _serverManager.Sites)
         {
+            // Load the site binding information
             var bindingCollection = new BindingCollection(this);
             foreach (var binding in site.Bindings)
             {
-                bindingCollection.Add(new Binding(
-                    binding.EndPoint.Address.ToString(),
-                    binding.Host,
-                    binding.EndPoint.Port));
+                bindingCollection.Add(
+                    new Binding(
+                        binding.EndPoint.Address.ToString(),
+                        binding.Host,
+                        binding.EndPoint.Port)
+                    );
             }
-            _sites.Add(new Site(
+
+            // Load the site into its own object
+            var _site = new Site(
                 site.Name,
                 site.Applications["/"].VirtualDirectories["/"].PhysicalPath,
-                bindingCollection));
+                bindingCollection);
+
+            // Mapping site properties
+            _site.Limits.ConnectionTimeout = site.Limits.ConnectionTimeout;
+            _site.Limits.MaxUrlSegments = site.Limits.MaxUrlSegments;
+            _site.Limits.MaxConnections = site.Limits.MaxConnections;
+            _site.Limits.MaxBandwidth = site.Limits.MaxBandwidth;
+
+            _sites.Add(_site);
         }
     }
 
