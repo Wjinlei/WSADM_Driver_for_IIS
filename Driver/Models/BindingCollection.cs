@@ -15,8 +15,7 @@ public class BindingCollection : IBindingInformationCollection
 
     // Indexer
     public IBindingInformation this[int index] => _list[index];
-    public IBindingInformation? this[string bindingInformation] => _list.Find(binding =>
-        binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
+    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
 
     // Constructor
     public BindingCollection(ISiteCollection<ISite> sites)
@@ -82,7 +81,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public void Remove(string bindingInformation)
     {
-        var binding = Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
+        var binding = _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
 
         if (binding != null)
             _list.Remove(binding);
@@ -101,7 +100,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public bool Contains(string bindingInformation)
     {
-        return Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation) != null;
+        return _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation) != null;
     }
 
     /// <summary>
