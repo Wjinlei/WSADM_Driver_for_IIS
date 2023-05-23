@@ -63,6 +63,11 @@ public class Tests
         Assert.That(bind, Is.Not.Null);
         bind.Port = 8080; // Modify port
 
+        example.Limits.ConnectionTimeout = TimeSpan.FromSeconds(300);
+        example.Limits.MaxUrlSegments = 64;
+        example.Limits.MaxBandwidth = 102400;
+        example.Limits.MaxConnections = 600;
+
         example.Bindings.Add("127.0.0.1:9999:test.example.com"); // Add binding information
         example.Bindings.Add("new.example.com:8088"); // Add binding information
         example.Bindings.Remove("bbs.example.com:8080"); // Delete binding information
