@@ -58,7 +58,7 @@ public class Binding : IBindingInformation
     /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is Binding binding && Address == binding.Address;
+        return obj is Binding binding && Address == binding.Address && Host == binding.Host && Port == binding.Port;
     }
 
     /// <summary>
@@ -67,6 +67,6 @@ public class Binding : IBindingInformation
     /// <returns></returns>
     public override int GetHashCode()
     {
-        return HashCode.Combine(Port, Host);
+        return HashCode.Combine(Address, Port, Host);
     }
 }

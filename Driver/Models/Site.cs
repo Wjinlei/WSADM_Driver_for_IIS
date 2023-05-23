@@ -26,7 +26,7 @@ public class Site : ISite
     /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is Site site
+        return obj is Site site && Name == site.Name
             && EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings);
     }
 
