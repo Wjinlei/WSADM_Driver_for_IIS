@@ -22,55 +22,61 @@ public class Tests
 
 
     [Test]
-    public void TestSiteAdd()
+    public void TestAdd()
     {
-        //_serverManager.Sites.Add("www.example.com", "d:/wwwroot", 80);
-        //_serverManager.Sites["www.example.com"]?.Bindings.Add("www.example.com", 80);
-        //_serverManager.Sites["www.example.com"]?.Bindings.Add("bbs.example.com", 8080);
-        //_serverManager.Sites["www.example.com"]?.Bindings.Add("m.example.com", 80);
-
-        var result = _serverManager.Sites.Add("www.example.com", "d:/wwwroot", new List<string>
+        var result = _serverManager.Sites.Add("test1.example.com", "d:/wwwroot", new List<string>
         {
-            "www.example.com",
-            "bbs.example.com:8080",
-            "m.example.com:80",
-            "127.0.0.1:8080:dev.example.com" // Bind to the specified IP address
+            "test1.example.com",
+            "bbs1.example.com",
+            "127.0.0.1:8080:dev1.example.com" // Bind to the specified IP address
         });
         if (!result.Success)
             TestContext.Out.WriteLine(result.Message);
+
         Assert.That(result.Success, Is.True);
     }
 
     [Test]
-    public void TestSiteDelete()
+    public void TestRemove()
     {
-        _serverManager.Sites.Remove("www.example.com");
+        var result = _serverManager.Sites.Add("test2.example.com", "d:/wwwroot", "test2.example.com", 80);
+        Assert.That(result.Success, Is.True);
 
-        //var example = _serverManager.Sites["www.example.com"];
-        //Assert.That(example, Is.Not.Null);
-        //_serverManager.Sites.Remove(example);
+        _serverManager.Sites.Remove("test2.example.com"); // Remove
+
+        var site = _serverManager.Sites["test2.example.com"];
+        Assert.That(site, Is.Null);
     }
 
     [Test]
-    public void TestSiteModify()
+    public void TestModifyBindings()
     {
-        // Get site
-        var example = _serverManager.Sites["www.example.com"];
-        Assert.That(example, Is.Not.Null);
 
-        // Modify binding
-        var bind = example.Bindings["m.example.com:80"];
+        var result = _serverManager.Sites.Add("test3.example.com", "d:/wwwroot", "test3.example.com", 80);
+        Assert.That(result.Success, Is.True);
+        var site = _serverManager.Sites["test3.example.com"];
+        Assert.That(site, Is.Not.Null);
+
+        site.Bindings.Add("bbs3.example.com"); // Add binding information
+        site.Bindings.Add("127.0.0.1:8080:dev3.example.com"); // Add binding information
+
+        var bind = site.Bindings["bbs3.example.com:80"];
         Assert.That(bind, Is.Not.Null);
-        bind.Port = 8080; // Modify port
+        bind.Port = 8088; // Modify port
+    }
 
-        example.Limits.ConnectionTimeout = TimeSpan.FromSeconds(300);
-        example.Limits.MaxUrlSegments = 64;
-        example.Limits.MaxBandwidth = 102400;
-        example.Limits.MaxConnections = 600;
+    [Test]
+    public void TestModifyLimits()
+    {
+        var result = _serverManager.Sites.Add("test4.example.com", "d:/wwwroot", "test4.example.com", 80);
+        Assert.That(result.Success, Is.True);
+        var site = _serverManager.Sites["test4.example.com"];
+        Assert.That(site, Is.Not.Null);
 
-        example.Bindings.Add("127.0.0.1:9999:test.example.com"); // Add binding information
-        example.Bindings.Add("new.example.com:8088"); // Add binding information
-        example.Bindings.Remove("bbs.example.com:8080"); // Delete binding information
+        site.Limits.ConnectionTimeout = TimeSpan.FromSeconds(300);
+        site.Limits.MaxUrlSegments = 64;
+        site.Limits.MaxBandwidth = 102400;
+        site.Limits.MaxConnections = 600;
     }
 
     [TearDown]
