@@ -8,8 +8,6 @@ public class Binding : IBindingInformation
     public int Port { get; set; }
     public string Host { get; set; }
 
-    public string EndPoint => Host + ":" + Port;
-
     public string BindingInformation
     {
         get
@@ -19,6 +17,8 @@ public class Binding : IBindingInformation
             return Address + ":" + Port + ":" + Host;
         }
     }
+
+    public string HostPort => Host + ":" + Port;
 
 
     public Binding(int port)
