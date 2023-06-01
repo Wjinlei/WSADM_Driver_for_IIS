@@ -4,19 +4,52 @@ namespace Driver.Models;
 
 public class Site : ISite
 {
-    public string Name { get; set; }
-    public string PhysicalPath { get; set; }
-    public string RunPath { get; set; }
-    public IBindingInformationCollection Bindings { get; set; }
-    public ISiteLimits Limits { get; set; }
+    private readonly Microsoft.Web.Administration.Site _site;
 
-    public Site(string name, string physicalPath, IBindingInformationCollection bindings)
+    public string Name
     {
-        Name = name;
-        PhysicalPath = physicalPath;
-        RunPath = physicalPath;
-        Bindings = bindings;
-        Limits = new SiteLimits(TimeSpan.FromSeconds(120), 32, 4294967295, 4294967295);
+        get => _site.Name;
+        set => _site.Name = value;
+    }
+
+    public string PhysicalPath
+    {
+        get => _site.Applications["/"].VirtualDirectories["/"].PhysicalPath;
+        set => _site.Applications["/"].VirtualDirectories["/"].PhysicalPath = value;
+    }
+
+    public IBindingInformationCollection Bindings => new BindingCollection(_site.Bindings);
+
+    public ISiteLimits Limits => new SiteLimits(_site.Limits);
+
+    public ObjectState State
+    {
+        get
+        {
+            return _site.State switch
+            {
+                Microsoft.Web.Administration.ObjectState.Starting => ObjectState.Starting,
+                Microsoft.Web.Administration.ObjectState.Started => ObjectState.Started,
+                Microsoft.Web.Administration.ObjectState.Stopping => ObjectState.Stopping,
+                Microsoft.Web.Administration.ObjectState.Stopped => ObjectState.Stopped,
+                _ => ObjectState.Unknown,
+            };
+        }
+    }
+
+    public Site(Microsoft.Web.Administration.Site site)
+    {
+        _site = site;
+    }
+
+    public void Start()
+    {
+        _site.Start();
+    }
+
+    public void Stop()
+    {
+        _site.Stop();
     }
 
     /// <summary>
@@ -26,8 +59,7 @@ public class Site : ISite
     /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is Site site && Name == site.Name
-            && EqualityComparer<IBindingInformationCollection>.Default.Equals(Bindings, site.Bindings);
+        return _site.Equals(obj);
     }
 
     /// <summary>
@@ -36,6 +68,6 @@ public class Site : ISite
     /// <returns></returns>
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name);
+        return _site.GetHashCode();
     }
 }

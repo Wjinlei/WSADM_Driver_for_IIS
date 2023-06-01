@@ -18,42 +18,11 @@ public class Manager : IServerManager
     {
         _serviceController = new ServiceController("W3SVC");
         _serverManager = new ServerManager();
-        _sites = new SiteCollection(_serverManager);
+        _sites = new SiteCollection(_serverManager.Sites);
     }
 
     public void CommitChanges()
     {
-        _serverManager.Sites.Clear();
-
-        // Add sites
-        foreach (var _site in _sites)
-        {
-            // The first binding information for the site
-            var _first = _site.Bindings.FirstOrDefault(new Binding("", 80));
-
-            // Add sites using ServerManager
-            var site = _serverManager.Sites.Add(
-                _site.Name,
-                "http",
-                _first.BindingInformation,
-                _site.PhysicalPath
-                );
-
-            // Continue adding the remaining binding information
-            foreach (var binding in _site.Bindings)
-            {
-                if (binding.BindingInformation == _first.BindingInformation) continue;
-                site.Bindings.Add(binding.BindingInformation, "http");
-            }
-
-            // Configuration site
-            // Limits
-            site.Limits.ConnectionTimeout = _site.Limits.ConnectionTimeout;
-            site.Limits.MaxUrlSegments = _site.Limits.MaxUrlSegments;
-            site.Limits.MaxConnections = _site.Limits.MaxConnections;
-            site.Limits.MaxBandwidth = _site.Limits.MaxBandwidth;
-        }
-
         _serverManager.CommitChanges();
     }
 

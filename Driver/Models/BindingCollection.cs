@@ -7,65 +7,57 @@ namespace Driver.Models;
 public class BindingCollection : IBindingInformationCollection
 {
     // Private
-    private readonly List<IBindingInformation> _list;
-    private readonly ISiteCollection<ISite> _sites;
+    private readonly Microsoft.Web.Administration.BindingCollection _bindingCollection;
 
     // Public
-    public int Count => _list.Count;
+    public int Count => _bindingCollection.Count;
 
     // Indexer
-    public IBindingInformation this[int index] => _list[index];
-    public IBindingInformation? this[string bindingInformation] => _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
+    public IBindingInformation this[int index]
+    {
+        get
+        {
+            return new Binding(_bindingCollection[index]);
+        }
+    }
+
+    public IBindingInformation? this[string bindingInformation]
+    {
+        get
+        {
+            var binding = _bindingCollection.FirstOrDefaultEx(bindingInformation);
+            return binding != null ? new Binding(binding) : null;
+        }
+    }
 
     // Constructor
-    public BindingCollection(ISiteCollection<ISite> sites)
+    public BindingCollection(Microsoft.Web.Administration.BindingCollection bindingCollection)
     {
-        _list = new List<IBindingInformation>();
-        _sites = sites;
+        _bindingCollection = bindingCollection;
     }
 
     // Methods
     // Check parameter
-    public Result Add(IBindingInformation bindingInformation)
+    public Result Add(string bindingInformation)
     {
-        var result = this.Check(bindingInformation, _sites);
-        if (result.Success)
-            _list.Add(bindingInformation);
-        return result;
+        return _bindingCollection.TryAdd(bindingInformation);
     }
 
-    public Result Add(int port)
+    public Result Add(IBindingInformation bindingInformation)
     {
-        return Add(new Binding(port));
+        return _bindingCollection.TryAdd(bindingInformation);
     }
 
     public Result Add(string domain, int port)
     {
-        return Add(new Binding(domain, port));
+        var binding = _bindingCollection.CreateBindingDefaults(domain, port);
+        return _bindingCollection.TryAdd(binding);
     }
 
     public Result Add(string ipAddr, string domain, int port)
     {
-        return Add(new Binding(ipAddr, domain, port));
-    }
-
-    /// <summary>
-    /// Adding binding information
-    /// </summary>
-    /// <param name="bindingInformation"></param>
-    /// <returns></returns>
-    public Result Add(string bindingInformation)
-    {
-        var binding = bindingInformation.Split(":");
-
-        var ipAddrOrDefault = binding.ElementAtOrDefault(binding.Length > 2 ? 0 : -1) ?? "0.0.0.0";
-        var domainNameOrDefault = binding.ElementAtOrDefault(binding.Length > 2 ? 2 : 0) ?? "";
-        var portOrDefault = binding.ElementAtOrDefault(1) ?? "80";
-
-        return Add(new Binding(
-            ipAddrOrDefault,
-            domainNameOrDefault,
-            Mojito.Convert.ToInt32OrDefault(portOrDefault, 80)));
+        var binding = _bindingCollection.CreateBindingDefaults(ipAddr, domain, port);
+        return _bindingCollection.TryAdd(binding);
     }
 
     /// <summary>
@@ -73,7 +65,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public void Clear()
     {
-        _list.Clear();
+        _bindingCollection.Clear();
     }
 
     /// <summary>
@@ -81,10 +73,9 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public void Remove(string bindingInformation)
     {
-        var binding = _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation);
-
+        var binding = _bindingCollection.FirstOrDefaultEx(bindingInformation);
         if (binding != null)
-            _list.Remove(binding);
+            _bindingCollection.Remove(binding);
     }
 
     /// <summary>
@@ -92,7 +83,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public void Remove(IBindingInformation bindingInformation)
     {
-        _list.Remove(bindingInformation);
+        Remove(bindingInformation.BindingInformation);
     }
 
     /// <summary>
@@ -100,7 +91,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public bool Contains(string bindingInformation)
     {
-        return _list.Find(binding => binding.BindingInformation == bindingInformation || binding.HostPort == bindingInformation) != null;
+        return _bindingCollection.FirstOrDefaultEx(bindingInformation) != null;
     }
 
     /// <summary>
@@ -108,15 +99,7 @@ public class BindingCollection : IBindingInformationCollection
     /// </summary>
     public bool Contains(IBindingInformation bindingInformation)
     {
-        return _list.Contains(bindingInformation);
-    }
-
-    /// <summary>
-    /// Searches for binding information that matches the condition defined by the specified predicate and returns the first matching element in the entire List<T>.
-    /// </summary>
-    public IBindingInformation? Find(Predicate<IBindingInformation> match)
-    {
-        return _list.Find(match);
+        return Contains(bindingInformation.BindingInformation);
     }
 
     /// <summary>
@@ -125,7 +108,7 @@ public class BindingCollection : IBindingInformationCollection
     /// <returns></returns>
     public IEnumerator<IBindingInformation> GetEnumerator()
     {
-        return _list.GetEnumerator();
+        return _bindingCollection.Select(binding => new Binding(binding)).ToList().GetEnumerator();
     }
 
     /// <summary>
@@ -140,12 +123,11 @@ public class BindingCollection : IBindingInformationCollection
     /// <summary>
     /// Override
     /// </summary>
-    /// <param name="obj">Compare object</param>
+    /// <param name="obj"></param>
     /// <returns></returns>
     public override bool Equals(object? obj)
     {
-        return obj is BindingCollection collection &&
-            _list.Intersect(collection._list).Any();
+        return _bindingCollection.Equals(obj);
     }
 
     /// <summary>
@@ -154,6 +136,6 @@ public class BindingCollection : IBindingInformationCollection
     /// <returns></returns>
     public override int GetHashCode()
     {
-        return 0;
+        return _bindingCollection.GetHashCode();
     }
 }

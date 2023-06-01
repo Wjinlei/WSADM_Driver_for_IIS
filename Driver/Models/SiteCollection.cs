@@ -1,5 +1,4 @@
-﻿using Microsoft.Web.Administration;
-using System.Collections;
+﻿using System.Collections;
 using WSADM;
 using WSADM.Interfaces;
 
@@ -8,74 +7,62 @@ namespace Driver.Models;
 public class SiteCollection : ISiteCollection<ISite>
 {
     // Private
-    private readonly List<ISite> _sites;
-    private readonly ServerManager _serverManager;
+    private readonly Microsoft.Web.Administration.SiteCollection _siteCollection;
 
     // Public
-    public int Count => _sites.Count;
+    public int Count => _siteCollection.Count;
 
     // Indexer
-    public ISite this[int index] => _sites[index];
-    public ISite? this[string name] => _sites.Find(s => s.Name == name);
-
-    // Constructor
-    public SiteCollection(ServerManager serverManager)
+    public ISite this[int index]
     {
-        _sites = new List<ISite>();
-        _serverManager = serverManager;
-
-        // Load all sites from ServerManager
-        foreach (var site in _serverManager.Sites)
+        get
         {
-            // Load the site binding information
-            var bindingCollection = new BindingCollection(this);
-            foreach (var binding in site.Bindings)
-            {
-                bindingCollection.Add(
-                    new Binding(
-                        binding.EndPoint.Address.ToString(),
-                        binding.Host,
-                        binding.EndPoint.Port)
-                    );
-            }
-
-            // Load the site into its own object
-            var _site = new Site(
-                site.Name,
-                site.Applications["/"].VirtualDirectories["/"].PhysicalPath,
-                bindingCollection);
-
-            // Mapping site properties
-            _site.Limits.ConnectionTimeout = site.Limits.ConnectionTimeout;
-            _site.Limits.MaxUrlSegments = site.Limits.MaxUrlSegments;
-            _site.Limits.MaxConnections = site.Limits.MaxConnections;
-            _site.Limits.MaxBandwidth = site.Limits.MaxBandwidth;
-
-            _sites.Add(_site);
+            return new Site(_siteCollection[index]);
         }
     }
 
-    // Methods
-    public Result Add(ISite site)
+    public ISite? this[string name]
     {
-        // Check parameter
-        var result = this.Check(site);
-        if (result.Success)
-            _sites.Add(site);
-        return result;
+        get
+        {
+            var site = _siteCollection.FirstOrDefaultEx(name);
+            return site != null ? new Site(site) : null;
+        }
     }
 
+    // Constructor
+    public SiteCollection(Microsoft.Web.Administration.SiteCollection siteCollection)
+    {
+        _siteCollection = siteCollection;
+    }
+
+    // Methods
     public Result Add(
         string name,
         string physicalPath,
         IBindingInformationCollection bindings)
     {
-        return Add(new Site(name, physicalPath, bindings));
+        var _site = _siteCollection.CreateSiteDefaults(name, physicalPath);
+        var result = _site.Bindings.TryAddCollection(bindings);
+        if (!result.Success)
+            return result;
+
+        return _siteCollection.TryAdd(_site);
     }
 
-    public Result Add(string name, string physicalPath, int port)
+    public Result Add(ISite site)
     {
-        return Add(name, physicalPath, ":" + port);
+        return Add(site.Name, site.PhysicalPath, site.Bindings);
+    }
+
+    public Result Add(string name, string physicalPath, string binding)
+    {
+        var _site = _siteCollection.CreateSiteDefaults(name, physicalPath);
+        var result = _site.Bindings.TryAdd(binding);
+        if (!result.Success)
+            return result;
+
+        return _siteCollection.TryAdd(_site);
     }
 
     public Result Add(string name, string physicalPath, string domain, int port)
@@ -83,26 +70,14 @@ public class SiteCollection : ISiteCollection<ISite>
         return Add(name, physicalPath, domain + ":" + port);
     }
 
-    public Result Add(string name, string physicalPath, string binding)
+    public Result Add(string name, string physicalPath, List<string> bindings)
     {
-        var bindingCollection = new BindingCollection(this);
-        var result = bindingCollection.Add(binding);
+        var _site = _siteCollection.CreateSiteDefaults(name, physicalPath);
+        var result = _site.Bindings.TryAddCollection(bindings);
         if (!result.Success)
             return result;
 
-        return Add(new Site(name, physicalPath, bindingCollection));
-    }
-
-    public Result Add(string name, string physicalPath, List<string> bindings)
-    {
-        var bindingCollection = new BindingCollection(this);
-        foreach (var binding in bindings)
-        {
-            var result = bindingCollection.Add(binding);
-            if (!result.Success)
-                return result;
-        }
-        return Add(new Site(name, physicalPath, bindingCollection));
+        return _siteCollection.TryAdd(_site);
     }
 
     /// <summary>
@@ -110,7 +85,7 @@ public class SiteCollection : ISiteCollection<ISite>
     /// </summary>
     public void Clear()
     {
-        _sites.Clear();
+        _siteCollection.Clear();
     }
 
     /// <summary>
@@ -118,9 +93,9 @@ public class SiteCollection : ISiteCollection<ISite>
     /// </summary>
     public void Remove(string name)
     {
-        var site = _sites.Find(site => site.Name == name);
-        if (site != null)
-            _sites.Remove(site);
+        var _site = _siteCollection.FirstOrDefaultEx(name);
+        if (_site != null)
+            _siteCollection.Remove(_site);
     }
 
     /// <summary>
@@ -128,7 +103,7 @@ public class SiteCollection : ISiteCollection<ISite>
     /// </summary>
     public void Remove(ISite site)
     {
-        _sites.Remove(site);
+        Remove(site.Name);
     }
 
     /// <summary>
@@ -136,7 +111,7 @@ public class SiteCollection : ISiteCollection<ISite>
     /// </summary>
     public bool Contains(string name)
     {
-        return _sites.Find(site => site.Name == name) != null;
+        return _siteCollection.FirstOrDefaultEx(name) != null;
     }
 
     /// <summary>
@@ -144,15 +119,7 @@ public class SiteCollection : ISiteCollection<ISite>
     /// </summary>
     public bool Contains(ISite site)
     {
-        return _sites.Contains(site);
-    }
-
-    /// <summary>
-    /// Searches for site that matches the condition defined by the specified predicate and returns the first matching element in the entire List<T>.
-    /// </summary>
-    public ISite? Find(Predicate<ISite> match)
-    {
-        return _sites.Find(match);
+        return Contains(site.Name);
     }
 
     /// <summary>
@@ -161,7 +128,7 @@ public class SiteCollection : ISiteCollection<ISite>
     /// <returns></returns>
     public IEnumerator<ISite> GetEnumerator()
     {
-        return _sites.GetEnumerator();
+        return _siteCollection.Select(site => new Site(site)).ToList().GetEnumerator();
     }
 
     /// <summary>

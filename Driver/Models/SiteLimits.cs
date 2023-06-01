@@ -4,16 +4,34 @@ namespace Driver.Models;
 
 public class SiteLimits : ISiteLimits
 {
-    public TimeSpan ConnectionTimeout { get; set; }
-    public long MaxUrlSegments { get; set; }
-    public long MaxConnections { get; set; }
-    public long MaxBandwidth { get; set; }
+    private readonly Microsoft.Web.Administration.SiteLimits _siteLimits;
 
-    public SiteLimits(TimeSpan connectionTimeout, long maxUrlSegments, long maxConnections, long maxBandwidth)
+    public long MaxUrlSegments
     {
-        ConnectionTimeout = connectionTimeout;
-        MaxUrlSegments = maxUrlSegments;
-        MaxConnections = maxConnections;
-        MaxBandwidth = maxBandwidth;
+        get => _siteLimits.MaxUrlSegments;
+        set => _siteLimits.MaxUrlSegments = value;
+    }
+
+    public long MaxConnections
+    {
+        get => _siteLimits.MaxConnections;
+        set => _siteLimits.MaxConnections = value;
+    }
+
+    public long MaxBandwidth
+    {
+        get => _siteLimits.MaxBandwidth;
+        set => _siteLimits.MaxBandwidth = value;
+    }
+
+    public TimeSpan ConnectionTimeout
+    {
+        get => _siteLimits.ConnectionTimeout;
+        set => _siteLimits.ConnectionTimeout = value;
+    }
+
+    public SiteLimits(Microsoft.Web.Administration.SiteLimits siteLimits)
+    {
+        _siteLimits = siteLimits;
     }
 }
