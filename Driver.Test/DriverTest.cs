@@ -83,6 +83,23 @@ public class Tests
         site.Limits.MaxConnections = 600;
     }
 
+    [Test]
+    public void TestState()
+    {
+        var result = _serverManager.Sites.Add("test5.example.com", "d:/wwwroot", "test5.example.com", 80);
+        Assert.That(result.Success, Is.True);
+        Commit();
+
+        Thread.Sleep(1000);
+
+        var site = _serverManager.Sites["test5.example.com"];
+        Assert.That(site, Is.Not.Null);
+
+        Assert.That(site.State, Is.EqualTo(ObjectState.Started));
+        site.Stop();
+        Assert.That(site.State, Is.EqualTo(ObjectState.Stopped));
+    }
+
     [TearDown]
     public void Commit()
     {
