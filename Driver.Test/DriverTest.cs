@@ -57,12 +57,16 @@ public class Tests
         var site = _serverManager.Sites["test3.example.com"];
         Assert.That(site, Is.Not.Null);
 
-        site.Bindings.Add("bbs3.example.com"); // Add binding information
-        site.Bindings.Add("127.0.0.1:8080:dev3.example.com"); // Add binding information
+        site.Bindings.Add("bbs3.example.com");
+        site.Bindings.Add("127.0.0.1:8080:dev3.example.com");
 
+        // Modify binding
         var bind = site.Bindings["bbs3.example.com:80"];
         Assert.That(bind, Is.Not.Null);
-        bind.Port = 8088; // Modify port
+
+        var r = site.Bindings.Add(bind.Host, 8080);
+        Assert.That(r.Success, Is.True);
+        site.Bindings.Remove(bind);
     }
 
     [Test]
